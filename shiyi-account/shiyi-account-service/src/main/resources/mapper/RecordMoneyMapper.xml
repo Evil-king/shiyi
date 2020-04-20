@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.account.dao.RecordMoneyMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.account.model.RecordMoney">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+      <result column="record_no" jdbcType="VARCHAR" property="recordNo" />
+    <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+    <result column="trade_type" jdbcType="VARCHAR" property="tradeType" />
+    <result column="balance" jdbcType="DECIMAL" property="balance" />
+    <result column="change_amount" jdbcType="DECIMAL" property="changeAmount" />
+    <result column="order_no" jdbcType="VARCHAR" property="orderNo" />
+    <result column="retype" jdbcType="VARCHAR" property="retype" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+  <select id="findTotalChangeAmountByTradeType" parameterType="Map" resultType="java.math.BigDecimal">
+        select SUM(change_amount) from tbl_record_money where customer_no=#{customerNo} and trade_type=#{code};
+  </select>
+    <select id="findTotalByRetype" parameterType="Map" resultType="java.math.BigDecimal">
+        select ifnull(SUM(change_amount),0) from tbl_record_money where customer_no=#{customerNo} and retype=#{retype};
+    </select>
+  <select id="recordList" resultType="com.baibei.shiyi.account.common.vo.RecordVo" parameterType="com.baibei.shiyi.account.common.dto.RecordDto">
+          SELECT
+	trade_type tradeType,
+	create_time createTime,
+	change_amount changeAmount,
+      record_no recordNo
+FROM
+	tbl_record_money
+	where customer_no=#{customerNo}
+	<if test="retype !='' and retype!=null ">
+        and retype=#{retype}
+    </if>
+    <if test="startTime!=null and startTime!=''">
+      and create_time &gt;= STR_TO_DATE(concat(#{startTime},' 00:00:00'),'%Y-%m-%d %H:%i:%s')
+    </if>
+    <if test="endTime!=null and endTime!=''">
+      and create_time &lt;= STR_TO_DATE(concat(#{endTime},' 23:59:59'),'%Y-%m-%d %H:%i:%s')
+    </if>
+      order by create_time DESC,id
+  </select>
+    <select id="AdminRecordList" parameterType="com.baibei.shiyi.account.feign.bean.dto.AdminRecordDto" resultType="com.baibei.shiyi.account.feign.bean.vo.AdminRecordVo">
+        select record_no recordNo,customer_no customerNo,retype,trade_type tradeType,change_amount changeAmount,order_no orderNo,balance,remark,DATE_FORMAT(create_time,'%Y-%m-%d %H:%i:%s') createTime
+        from tbl_record_money where 1=1
+        <if test="retype !='' and retype!=null ">
+            and retype=#{retype}
+        </if>
+        <if test="orderNo !='' and orderNo!=null ">
+            and order_no=#{orderNo}
+        </if>
+        <if test="customerNo !='' and customerNo!=null ">
+            and customer_no=#{customerNo}
+        </if>
+        <if test="tradeType !='' and tradeType!=null ">
+            and trade_type=#{tradeType}
+        </if>
+        <if test="recordNo !='' and recordNo!=null ">
+            and record_no=#{recordNo}
+        </if>
+        <if test="startTime!=null and startTime!=''">
+            and create_time &gt;= STR_TO_DATE(concat(#{startTime},' 00:00:00'),'%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            and create_time &lt;= STR_TO_DATE(concat(#{endTime},' 23:59:59'),'%Y-%m-%d %H:%i:%s')
+        </if>
+        order by create_time DESC,id
+    </select>
+</mapper>

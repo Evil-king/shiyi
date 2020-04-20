@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.cash.dao.OrderWithdrawMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.cash.model.OrderWithdraw">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+    <result column="account" jdbcType="VARCHAR" property="account" />
+    <result column="account_name" jdbcType="VARCHAR" property="accountName" />
+    <result column="order_no" jdbcType="VARCHAR" property="orderNo" />
+    <result column="orderAmt" jdbcType="DECIMAL" property="orderamt" />
+    <result column="order_type" jdbcType="VARCHAR" property="orderType" />
+    <result column="bank_name" jdbcType="VARCHAR" property="bankName" />
+    <result column="handel_fee" jdbcType="DECIMAL" property="handelFee" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="reviewer" jdbcType="VARCHAR" property="reviewer" />
+    <result column="reviewer_time" jdbcType="TIMESTAMP" property="reviewerTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+    <result column="effective" jdbcType="TINYINT" property="effective" />
+    <result column="external_no" jdbcType="VARCHAR" property="externalNo" />
+    <result column="sup_acct_Id" jdbcType="VARCHAR" property="supAcctId" />
+    <result column="cust_acct_Id" jdbcType="VARCHAR" property="custAcctId" />
+    <result column="remarks" jdbcType="LONGVARCHAR" property="remarks" />
+    <result column="fuqing_withdraw_req" jdbcType="LONGVARCHAR" property="fuqingWithdrawReq" />
+    <result column="fuqing_withdraw_resp" jdbcType="LONGVARCHAR" property="fuqingWithdrawResp" />
+  </resultMap>
+  <select id="pageList" resultType="com.baibei.shiyi.cash.feign.base.vo.WithdrawListVo">
+    SELECT
+    w.order_no orderNo,
+    w.customer_no customerNo,
+    w.reviewer,
+    w.account_name AS userName,
+    w.orderAmt orderamt,
+    w.handel_fee handelFee,
+    CASE
+    WHEN w.status = '0'
+    THEN
+    '初始化'
+    WHEN w.status = '1'
+    THEN
+    '待审核'
+    WHEN w.status = '2'
+    THEN
+    '审核通过'
+    WHEN w.status = '3'
+    THEN
+    '渠道处理中'
+    WHEN w.status = '4'
+    THEN
+    '提现成功'
+    WHEN w.status = '5'
+    THEN
+    '提现失败'
+    WHEN w.status = '6'
+    THEN
+    '审核不通过'
+    WHEN w.status = '7'
+    THEN
+    '系统处理中'
+    END status,
+    DATE_FORMAT(w.create_time,'%Y-%m-%d %H:%i:%s') startTime,
+    DATE_FORMAT(w.modify_time,'%Y-%m-%d %H:%i:%s') endTime,
+    DATE_FORMAT(w.reviewer_time,'%Y-%m-%d %H:%i:%s') reviewTime,
+    w.external_no externalNo
+    FROM tbl_tra_order_withdraw w where 1=1
+    <if test="orderNo != null and orderNo !=''">
+      and w.order_no=#{orderNo}
+    </if>
+    <if test="customerNo != null and customerNo!=''">
+      and w.customer_no=#{customerNo}
+    </if>
+    <if test="customerNo != null and customerNo!=''">
+      and w.customer_no=#{customerNo}
+    </if>
+    <if test="userName != null and userName !=''">
+      and w.account_name like CONCAT('%',#{userName},'%')
+    </if>
+    <if test="status != null and status!=''">
+      and w.status=#{status}
+    </if>
+    <if test="externalNo != null and externalNo!=''">
+      and w.external_no=#{externalNo}
+    </if>
+    <if test="startTime != null and startTime!=''">
+      and date(w.create_time) &gt;= #{startTime}
+    </if>
+    <if test="endTime != null and endTime!=''">
+      and date(w.create_time) &lt;= #{endTime}
+    </if>
+    <if test="effective != null and effective!=''">
+      and w.effective = #{effective}
+    </if>
+    <if test="reviewer != null and reviewer!=''">
+      and w.reviewer=#{reviewer}
+    </if>
+    order by w.create_time desc
+  </select>
+  <select id="sumAmountOfCustomer" resultType="java.math.BigDecimal">
+    select SUM(w.orderAmt+w.handel_fee) as sumAmount from tbl_tra_order_withdraw w where w.status in('2','3','4','7') and w.customer_no=#{customerNo}
+    and  DATE_FORMAT(w.create_time,'%Y-%m-%d') = DATE_FORMAT(#{nowTime},'%Y-%m-%d')
+  </select>
+  <select id="selectPeriodOrderList" resultMap="BaseResultMap">
+      select * from tbl_tra_order_withdraw where DATE_FORMAT(create_time,'%Y%m%d')=#{period}
+    </select>
+</mapper>

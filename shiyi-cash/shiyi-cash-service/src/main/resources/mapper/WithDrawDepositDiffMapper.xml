@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.cash.dao.WithDrawDepositDiffMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.cash.model.WithDrawDepositDiff">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="batch_no" jdbcType="VARCHAR" property="batchNo" />
+    <result column="order_no" jdbcType="VARCHAR" property="orderNo" />
+    <result column="external_no" jdbcType="VARCHAR" property="externalNo" />
+    <result column="hengjia_status" jdbcType="VARCHAR" property="hengjiaStatus" />
+    <result column="bank_status" jdbcType="VARCHAR" property="bankStatus" />
+    <result column="hengjia_amount" jdbcType="DECIMAL" property="hengjiaAmount" />
+    <result column="bank_amount" jdbcType="DECIMAL" property="bankAmount" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+    <result column="diff_type" jdbcType="VARCHAR" property="diffType" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+  <sql id="baseColumn">
+      t.id,
+      t.batch_no as batchNo,
+      t.order_no as orderNo,
+      t.external_no as externalNo,
+      t.hengjia_status as hengjiaStatus,
+      t.bank_status as bankStatus,
+      t.hengjia_amount as hengjiaAmount,
+      t.bank_amount as bankAmount,
+      t.type,
+      t.diff_type as diffType,
+      t. STATUS,
+      DATE_FORMAT(t.create_time,'%Y-%m-%d %H:%i:%s') createTime,
+      DATE_FORMAT(t.modify_time,'%Y-%m-%d %H:%i:%s') modifyTime,
+      t.flag
+  </sql>
+  <sql id="baseFilter">
+    <where>
+      <if test="batchNo!=null and batchNo!=''">
+        and t.batch_no=#{batchNo}
+      </if>
+      <if test="orderNo!=null and orderNo!=''">
+        and t.order_no=#{orderNo}
+      </if>
+      <if test="externalNo!=null and externalNo!=''">
+        and t.external_no=#{externalNo}
+      </if>
+      <if test="diffType!=null and diffType!=''">
+        and t.diff_type=#{diffType}
+      </if>
+      <if test="type!=null and type!=''">
+        and t.type=#{type}
+      </if>
+      <if test="status!=null and status!=''">
+        and t.status=#{status}
+      </if>
+      <if test="startTime!=null and startTime!=''">
+        and DATE_FORMAT(t.create_time,'%Y-%m-%d') &gt;= DATE_FORMAT(#{startTime},'%Y-%m-%d')
+      </if>
+      <if test="endTime!=null and endTime!=''">
+        and DATE_FORMAT(t.create_time,'%Y-%m-%d') &lt;= DATE_FORMAT(#{endTime},'%Y-%m-%d')
+      </if>
+      <if test="customerNo!=null and customerNo!=''">
+        and (u.customer_no=#{customerNo} or bk.member_no=#{customerNo})
+      </if>
+      and t.flag=1
+    </where>
+  </sql>
+  <select id="myList" resultType="com.baibei.shiyi.cash.bean.vo.WithDrawDepositDiffVo">
+    select
+    <include refid="baseColumn"/>
+    from tbl_set_withdraw_deposit_diff t
+    <include refid="baseFilter"/>
+    order by t.create_time desc
+    <if test="exportLimit!=null">
+      limit ${exportLimit}
+    </if>
+  </select>
+</mapper>

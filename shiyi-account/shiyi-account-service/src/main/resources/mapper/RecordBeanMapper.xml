@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.account.dao.RecordBeanMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.account.model.RecordBean">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="bean_type" jdbcType="VARCHAR" property="beanType" />
+    <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+    <result column="record_no" jdbcType="VARCHAR" property="recordNo" />
+    <result column="change_amount" jdbcType="DECIMAL" property="changeAmount" />
+    <result column="balance" jdbcType="DECIMAL" property="balance" />
+    <result column="trade_type" jdbcType="VARCHAR" property="tradeType" />
+    <result column="order_no" jdbcType="VARCHAR" property="orderNo" />
+    <result column="retype" jdbcType="VARCHAR" property="retype" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+  <select id="recordList" parameterType="com.baibei.shiyi.account.common.dto.RecordBeanDto" resultType="com.baibei.shiyi.account.common.vo.RecordVo">
+    SELECT
+    trade_type tradeType,
+    DATE_FORMAT(create_time,'%Y-%m-%d %H:%i:%s') createTime,
+    CAST(change_amount AS DECIMAL(20,2)) changeAmount
+    FROM
+    tbl_record_bean
+    where customer_no=#{customerNo} and bean_type=#{beanType}
+    <if test="retype !='' and retype!=null ">
+      and retype=#{retype}
+    </if>
+    <if test="startTime!=null and startTime!=''">
+      and create_time &gt;= STR_TO_DATE(concat(#{startTime},' 00:00:00'),'%Y-%m-%d %H:%i:%s')
+    </if>
+    <if test="endTime!=null and endTime!=''">
+      and create_time &lt;= STR_TO_DATE(concat(#{endTime},' 23:59:59'),'%Y-%m-%d %H:%i:%s')
+    </if>
+    order by create_time DESC,id
+  </select>
+  <select id="recordPageList" resultType="com.baibei.shiyi.account.feign.bean.vo.AdminRecordVo" parameterType="com.baibei.shiyi.account.feign.bean.dto.AdminRecordBeanDto">
+    select record_no recordNo,customer_no customerNo,retype,trade_type tradeType,CAST(change_amount AS DECIMAL(20,2)) changeAmount,order_no orderNo,balance,remark,
+    DATE_FORMAT(create_time,'%Y-%m-%d %H:%i:%s') createTime
+    from tbl_record_bean where 1=1 and bean_type=#{beanType}
+    <if test="retype !='' and retype!=null ">
+      and retype=#{retype}
+    </if>
+    <if test="orderNo !='' and orderNo!=null ">
+      and order_no=#{orderNo}
+    </if>
+    <if test="customerNo !='' and customerNo!=null ">
+      and customer_no=#{customerNo}
+    </if>
+    <if test="tradeType !='' and tradeType!=null ">
+      and trade_type=#{tradeType}
+    </if>
+    <if test="recordNo !='' and recordNo!=null ">
+      and record_no=#{recordNo}
+    </if>
+    <if test="startTime!=null and startTime!=''">
+      and create_time &gt;= STR_TO_DATE(concat(#{startTime},' 00:00:00'),'%Y-%m-%d %H:%i:%s')
+    </if>
+    <if test="endTime!=null and endTime!=''">
+      and create_time &lt;= STR_TO_DATE(concat(#{endTime},' 23:59:59'),'%Y-%m-%d %H:%i:%s')
+    </if>
+    order by create_time DESC,id
+  </select>
+  <select id="getDailyIncrement" resultType="decimal" parameterType="string">
+    select ifnull(CAST(sum(change_amount) AS decimal(18,2)),0) changeAmount  from tbl_record_bean where retype='in' and customer_no=#{customerNo} and DATE(create_time)=DATE_FORMAT(date_add(now(),INTERVAL -1 day),'%Y-%m-%d')  and bean_type='exchange';
+  </select>
+</mapper>

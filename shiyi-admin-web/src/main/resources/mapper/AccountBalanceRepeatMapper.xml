@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.admin.modules.account.dao.AccountBalanceRepeatMapper">
+    <resultMap id="BaseResultMap" type="com.baibei.shiyi.admin.modules.account.model.AccountBalanceRepeat">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="customer_no" jdbcType="VARCHAR" property="customerNo"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="batch_no" jdbcType="VARCHAR" property="batchNo"/>
+        <result column="balance" jdbcType="DECIMAL" property="balance"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="flag" jdbcType="TINYINT" property="flag"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="execution_time" jdbcType="TIMESTAMP" property="executionTime"/>
+        <result column="execution_by" jdbcType="VARCHAR" property="executionBy"/>
+        <result column="balance_type" jdbcType="VARCHAR" property="balanceType"/>
+        <result column="status" jdbcType="VARBINARY" property="status"/>
+    </resultMap>
+    <select id="findPageList" resultType="com.baibei.shiyi.admin.modules.account.bean.vo.AccountBalanceRepeatVo">
+        select
+        id as id,
+        customer_no as customerNo,
+        phone as phone,
+        batch_no as batchNo,
+        balance as balance,
+        create_time as createTime,
+        create_by as createBy,
+        execution_time as executionTime,
+        execution_by as executeBy,
+        balance_type as balanceType,
+        case
+        when balance_type='in' then '转入'
+        when balance_type='out'then '转出'
+        end as balanceTypeText,
+        status as status,
+        case
+        when status='wait' then '待执行'
+        when status='success'then '执行成功'
+        when status='fail' then '执行失败'
+        when status='timeout'then '超时'
+        end as statusText
+        from tbl_admin_account_balance_repeat
+        <where>
+            flag=1
+            and to_days(create_time) = to_days(now())
+            <if test="batchNo!=null and batchNo!=''">
+               and batch_no=#{batchNo}
+            </if>
+
+        </where>
+        order by create_time desc
+    </select>
+</mapper>

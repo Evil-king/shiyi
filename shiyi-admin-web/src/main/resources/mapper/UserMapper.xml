@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.admin.modules.system.dao.UserMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.admin.modules.system.model.User">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="avatar" jdbcType="VARCHAR" property="avatar" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="enabled" jdbcType="BIGINT" property="enabled" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="last_password_reset_time" jdbcType="TIMESTAMP" property="lastPasswordResetTime" />
+    <result column="dept_id" jdbcType="BIGINT" property="deptId" />
+    <result column="phone" jdbcType="VARCHAR" property="phone" />
+    <result column="job_id" jdbcType="BIGINT" property="jobId" />
+  </resultMap>
+</mapper>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.cash.dao.FuqingAccountDepositMapper">
+    <resultMap id="BaseResultMap" type="com.baibei.shiyi.cash.model.FuqingAccountDeposit">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="serial_no" jdbcType="VARCHAR" property="serialNo"/>
+        <result column="exchange_id" jdbcType="VARCHAR" property="exchangeId"/>
+        <result column="exchange_fund_account" jdbcType="VARCHAR" property="exchangeFundAccount"/>
+        <result column="fund_password" jdbcType="VARCHAR" property="fundPassword"/>
+        <result column="money_type" jdbcType="VARCHAR" property="moneyType"/>
+        <result column="bisin_type" jdbcType="VARCHAR" property="bisinType"/>
+        <result column="bank_pro_code" jdbcType="VARCHAR" property="bankProCode"/>
+        <result column="account_name" jdbcType="VARCHAR" property="accountName"/>
+        <result column="bank_account" jdbcType="VARCHAR" property="bankAccount"/>
+        <result column="occur_amount" jdbcType="DECIMAL" property="occurAmount"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="member_main_type" jdbcType="CHAR" property="memberMainType"/>
+        <result column="full_name" jdbcType="VARCHAR" property="fullName"/>
+        <result column="id_kind" jdbcType="VARCHAR" property="idKind"/>
+        <result column="id_no" jdbcType="VARCHAR" property="idNo"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="flag" jdbcType="TINYINT" property="flag"/>
+        <result column="init_date" jdbcType="VARCHAR" property="initDate"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="fuqing_transfer_req" jdbcType="LONGVARCHAR" property="fuqingTransferReq"/>
+        <result column="order_no" jdbcType="VARCHAR" property="orderNo"></result>
+    </resultMap>
+    <select id="pageList" resultType="com.baibei.shiyi.cash.feign.base.vo.DepositWithdrawVo">
+        select t.* from ((SELECT
+        deposit.create_time as initDate,
+        deposit.serial_no as orderNo,
+        '入金' as type,
+        deposit.occur_amount as occurAmount,
+        deposit.exchange_fund_account as exchangeFundAccount,
+        deposit.bank_account as bankAccount,
+        deposit.remark as remark,
+        deposit.flag as flag
+        FROM
+        tbl_fuqing_account_deposit deposit
+        )
+        UNION
+        (SELECT
+        withdraw.create_time as initDate,
+        withdraw.order_no as orderNo,
+        '出金' as type,
+        withdraw.orderAmt as occurAmount,
+        withdraw.customer_no as exchangeFundAccount,
+        withdraw.account as bankAccount,
+        withdraw.remarks as remark,
+        withdraw.flag as flag
+        FROM
+        tbl_tra_order_withdraw withdraw))t
+        <where>
+            t.flag=1
+            <if test="startTime!=null">
+                and date_format(t.initDate,'%Y-%m-%d %H:%i:%s') &gt;= date_format(#{startTime},'%Y-%m-%d %H:%i:%s')
+            </if>
+
+            <if test="endTime!=null">
+                and date_format(t.initDate,'%Y-%m-%d %H:%i:%s') &lt;= date_format(#{endTime},'%Y-%m-%d %H:%i:%s')
+            </if>
+        </where>
+        order by t.initDate desc
+    </select>
+</mapper>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.admin.modules.account.dao.AccountBalanceErrorMapper">
+    <resultMap id="BaseResultMap" type="com.baibei.shiyi.admin.modules.account.model.AccountBalanceError">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="customer_no" jdbcType="VARCHAR" property="customerNo"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="balance_type" jdbcType="VARCHAR" property="balanceType"/>
+        <result column="balance" jdbcType="DECIMAL" property="balance"/>
+        <result column="error_msg" jdbcType="VARCHAR" property="errorMsg"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="flag" jdbcType="TINYINT" property="flag"/>
+        <result column="batch_no" jdbcType="VARCHAR" property="batchNo"></result>
+    </resultMap>
+    <select id="findPageList"
+            resultType="com.baibei.shiyi.admin.modules.account.bean.vo.AccountBalanceErrorVo">
+        select
+        id as id,
+        batch_no as batchNo,
+        customer_no as customerNo,
+        phone as phone,
+        balance_type as balanceType,
+        balance as balance,
+        case
+        when balance_type='in' then '转入'
+        when balance_type='out'then '转出'
+        end as balanceTypeText,
+        error_msg as errorMsg
+        from tbl_admin_account_balance_error
+        <where>
+            flag=1
+            and
+            to_days(create_time) = to_days(now())
+        </where>
+        order by create_time desc
+    </select>
+</mapper>

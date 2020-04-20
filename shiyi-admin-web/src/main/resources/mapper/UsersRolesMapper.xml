@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.admin.modules.system.dao.UsersRolesMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.admin.modules.system.model.UsersRoles">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="user_id" jdbcType="BIGINT" property="userId" />
+    <result column="role_id" jdbcType="BIGINT" property="roleId" />
+  </resultMap>
+  <select id="selectRoleByUserId" parameterType="long" resultType="com.baibei.shiyi.admin.modules.system.model.Role">
+    select r.id id,r.name name,r.create_time createTime,r.remark remark,r.data_scope dataScope,r.seq seq,r.pid pid,r.role_type roleType,r.modify_time modifyTime from tbl_admin_users_roles ur,tbl_admin_role r where r.id=ur.role_id and ur.user_id=#{userId}
+  </select>
+</mapper>

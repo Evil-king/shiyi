@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.account.dao.AccountMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.account.model.Account">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+    <result column="salt" jdbcType="VARCHAR" property="salt" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="balance" jdbcType="DECIMAL" property="balance" />
+    <result column="total_balance" jdbcType="DECIMAL" property="totalBalance" />
+    <result column="freezing_amount" jdbcType="DECIMAL" property="freezingAmount" />
+    <result column="withdrawable_cash" jdbcType="DECIMAL" property="withdrawableCash" />
+    <result column="freezing_bonus" jdbcType="DECIMAL" property="freezingBonus" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+    <update id="synchronizationBalance">
+        update tbl_account set withdrawable_cash=balance;
+    </update>
+    <select id="sumWithdrawAndDeposit"
+          resultType="com.baibei.shiyi.account.feign.bean.vo.SumWithdrawAndDepositVo">
+     select customer_no customerNo,trade_type tradeType,sum(change_amount) amount from tbl_record_money
+      where trade_type in ('withdraw','recharge') and
+      <![CDATA[DATE_FORMAT(CREATE_TIME , '%Y-%m-%d %H:%i:%s')>=  DATE_FORMAT(#{startTime}, '%Y-%m-%d %H:%i:%s')]]>
+      and
+      <![CDATA[DATE_FORMAT(CREATE_TIME , '%Y-%m-%d %H:%i:%s') <= DATE_FORMAT(#{startTime}, '%Y-%m-%d %H:%i:%s')]]>
+      group by customer_no,trade_type
+  </select>
+
+
+</mapper>

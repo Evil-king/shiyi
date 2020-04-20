@@ -1,0 +1,216 @@
+package com.baibei.shiyi.common.tool.enumeration;
+
+/** 福清银行代码枚举
+ * @author: hyc
+ * @date: 2019/5/29 14:53
+ * @description:
+ */
+public enum BankNameCodeEnum {
+    ICBC("ICBC","102100099996"),
+    ABC("ABC","103100000026"),
+    BOC("BOC","104100000004"),
+    BOSZ("BOSZ","313305066661"),
+    NYNB("NYNB","313591001001"),
+    JLRCU("JLRCU","402241000015"),
+    SDRCU("SDRCU","402451000010"),
+    WOORI("WOORI","593100000020"),
+    CABANK("CABANK","313791030003"),
+    RBOZ("RBOZ","313585000990"),
+    JXBANK("JXBANK","313335081005"),
+    ZGCCB("ZGCCB","313655091983"),
+    ZJNX("ZJNX","402331000007"),
+    LANGFB("LANGFB","313146000019"),
+    GLBANK("GLBANK","313617000018"),
+    YZBANK("YZBANK","320345790018"),
+    QLBANK("QLBANK","313451000019"),
+    GHB("GHB","313586000006"),
+    BOQZ("BOQZ","313397075189"),
+    CJCCB("CJCCB","313312300018"),
+    TCRCB("TCRCB","314305106644"),
+    XABANK("XABANK","313791000015"),
+    ZZYH("ZZYH","313454000016"),
+    UBCHN("UBCHN","314641000014"),
+    JJBANK("JJBANK","313424076706"),
+    CGNB("CGNB","313673093259"),
+    CDCB("CDCB","313651099999"),
+    HKBEA("HKBEA","502290000006"),
+    JRCB("JRCB","314302200018"),
+    CCB("CCB","105100000017"),
+    COMM("COMM","301290000007"),
+    CITIC("CITIC","302100011000"),
+    CEB("CEB","303100000006"),
+    HXBANK("HXBANK","304100040000"),
+    CMBC("CMBC","305100000013"),
+    GDB("GDB","306581000003"),
+    SPABANK("SPABANK","307584007998"),
+    CMB("CMB","308584000013"),
+    CIB("CIB","309391000011"),
+    BJBANK("BJBANK","313100000013"),
+    TCCB("TCCB","313110000017"),
+    GCB("GCB","313581003284"),
+    HBC("HBC","313521006000"),
+    BOD("BOD","313602088017"),
+    GRCB("GRCB","314581000011"),
+    SDEB("SDEB","314588000016"),
+    TRCB("TRCB","317110010019"),
+    BOHAIB("BOHAIB","318110000014"),
+    BJRCB("BJRCB","402100000018"),
+    SRCB("SRCB","402584009991"),
+    DRCBCL("DRCBCL","402602000018"),
+    PSBC("PSBC","403100000004"),
+    SCRCU("SCRCU","402651020006"),
+    BOSH("BOSH","595100000007"),
+    HANABANK("HANABANK","597100000014"),
+    BOJZ("BOJZ","313227000012"),
+    DLB("DLB","313222080002"),
+    ASCB("ASCB","313223007007"),
+    HLDB("HLDB","313227600018"),
+    QDCCB("QDCCB","313452060150"),
+    ZBCB("ZBCB","313453001017"),
+    YTBANK("YTBANK","313456000108"),
+    JNBANK("JNBANK","313461000012"),
+    TACCB("TACCB","313463000993"),
+    LSBC("LSBC","313473070018"),
+    DYCCB("DYCCB","313455000018"),
+    WHCCB("WHCCB","313465000010"),
+    RZB("RZB","313473200011"),
+    ARCU("ARCU","402361018886"),
+    CSCB("CSCB","313551088886"),
+    NCB("NCB","313421087506"),
+    SRBANK("SRBANK","313433076801"),
+    BGB("BGB","313611001018"),
+    ZYB("ZYB","313491099996"),
+    SHBANK("SHBANK","325290000012"),
+    SPDB("SPDB","310290000013"),
+    BOP("BOP","313495081900"),
+    ZRCBANK("ZRCBANK","314305670002"),
+    KSRB("KSRB","314305206650"),
+    HZCB("HZCB","313331000014"),
+    CZBANK("CZBANK","316331000018"),
+    CZCB("CZCB","313338707013"),
+    ZJTLCB("ZJTLCB","313345010019"),
+    WZCB("WZCB","313333007331"),
+    NBYZ("NBYZ","402332010004"),
+    NBBANK("NBBANK","313332082914"),
+    HZCCB("HZCCB","313336071575"),
+    XMBANK("XMBANK","313393080005"),
+    NXRCU("NXRCU","402871099996"),
+    BOHN("BOHN","402641000014"),
+    HURCB("HURCB","402521000032"),
+    KLB("KLB","313882000012"),
+    JINCHB("JINCHB","313168000003"),
+    URMQCCB("URMQCCB","313881000002"),
+    BOYK("BOYK","313228000276"),
+    XTB("XTB","313131000016"),
+    WEBANK("WEBANK","323584000888"),
+    FXCB("FXCB","313229000008"),
+    CDRCB("CDRCB","314651000000"),
+    PZHCCB("PZHCCB","313656000019"),
+    CQBANK("CQBANK","313653000013"),
+    CRCBANK("CRCBANK","314653000011"),
+    BHB("BHB","313121006888"),
+    HDBANK("HDBANK","313127000013"),
+    BOCD("BOCD","313141052422"),
+    ZJKCCB("ZJKCCB","313138000019"),
+    BOCZ("BOCZ","313143005157"),
+    DYCB("DYCB","313658000014"),
+    MYBANK("MYBANK","313659000016"),
+    HKB("HKB","313521000011"),
+    FDB("FDB","313731010015"),
+    YNRCC("YNRCC","402731057238"),
+    LZYH("LZYH","313821001016"),
+    NXBANK("NXBANK","313871000007"),
+    BOQH("BOQH","313851000018"),
+    DAQINGB("DAQINGB","313261099913"),
+    HRBANK("HRBANK","313261000018"),
+    ZZBANK("ZZBANK","313491000232"),
+    HSBK("HSBK","313148053964"),
+    LYBANK("LYBANK","313493080539"),
+    NBCBANK("NBCBANK","313332090019"),
+    GYCB("GYCB","313701098010"),
+    JSB("JSB","313161000017"),
+    H3CB("H3CB","313191000011"),
+    BSB("BSB","313192000013"),
+    ORBANK("ORBANK","313205057830"),
+    JLBANK("JLBANK","313241066661"),
+    GXRCU("GXRCU","402611099974"),
+    LZCCB("LZCCB","313614000012"),
+    QYBANK("QYBANK","596110000013"),
+    TZCB("TZCB","313345001665"),
+    MTBANK("MTBANK","313345400010"),
+    SXCB("SXCB","313337009004"),
+    EGBANK("EGBANK","315456000105"),
+    DZBANK("DZBANK","313468000015"),
+    BANKWF("BANKWF","313458000013"),
+    JSRCU("JSRCU","402301099998"),
+    CSRCB("CSRCB","314305506621"),
+    JSBANK("JSBANK","313301099999"),
+    NJCB("NJCB","313301008887"),
+    WJRCB("WJRCB","314305400015"),
+    GZB("GZB","313428076517"),
+    HSBANK("HSBANK","319361000013"),
+    FJNX("FJNX","402391000068"),
+    FJHXBC("FJHXBC","313391080007"),
+    SHRCB("SHRCB","322290000011"),
+    JZCBANK("JZCBANK","313501080608"),
+    WHRCB("WHRCB","402521090019"),
+    JXRCU("JXRCU","402421099990"),
+    JHBANK("JHBANK","313338009688"),
+    FBBANK("FBBANK","787290000019"),
+    GDRCC("GDRCC","402581090008"),
+    XIB("XIB","781393010011"),
+    ;
+
+    private String code;
+    private String msg;
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    BankNameCodeEnum(String code, String msg) {
+        this.code = code;
+        this.msg = msg;
+    }
+
+    /**
+     * 根据状态码获取到对应的提示信息
+     *
+     * @param code
+     * @return
+     */
+    public static String getMsg(String code) {
+        for (BankNameCodeEnum resultCodeMsg : values()) {
+            if (resultCodeMsg.getCode() .equals(code)) {
+                return resultCodeMsg.getMsg();
+            }
+        }
+        return null;
+    }
+    /**
+     * 根据提示信息获取到对应的状态码
+     *
+     * @param msg
+     * @return
+     */
+    public static String getCode(String msg) {
+        for (BankNameCodeEnum resultCodeMsg : values()) {
+            if (resultCodeMsg.getMsg() .equals(msg) ) {
+                return resultCodeMsg.getCode();
+            }
+        }
+        return null;
+    }
+}

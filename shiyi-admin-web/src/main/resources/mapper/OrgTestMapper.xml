@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.admin.modules.system.dao.OrgTestMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.admin.modules.system.model.OrgTest">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="org_code" jdbcType="BIGINT" property="orgCode" />
+    <result column="org_name" jdbcType="VARCHAR" property="orgName" />
+    <result column="org_mobile" jdbcType="VARCHAR" property="orgMobile" />
+    <result column="org_idnumber" jdbcType="VARCHAR" property="orgIdnumber" />
+    <result column="cause_code" jdbcType="VARCHAR" property="causeCode" />
+    <result column="cause_mobile" jdbcType="VARCHAR" property="causeMobile" />
+    <result column="flag" jdbcType="BIGINT" property="flag" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="business_type" jdbcType="VARCHAR" property="businessType" />
+  </resultMap>
+</mapper>

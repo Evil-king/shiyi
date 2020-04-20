@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.admin.modules.system.dao.MenuMapper">
+    <resultMap id="BaseResultMap" type="com.baibei.shiyi.admin.modules.system.model.Menu">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="i_frame" jdbcType="BIT" property="iFrame"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="component" jdbcType="VARCHAR" property="component"/>
+        <result column="pid" jdbcType="BIGINT" property="pid"/>
+        <result column="seq" jdbcType="BIGINT" property="seq"/>
+        <result column="icon" jdbcType="VARCHAR" property="icon"/>
+        <result column="path" jdbcType="VARCHAR" property="path"/>
+        <result column="menu_type" jdbcType="VARCHAR" property="menuType"/>
+        <result column="permission" jdbcType="VARCHAR" property="permission"/>
+        <result column="hidden" jdbcType="VARCHAR" property="hidden"/>
+        <result column="flag" jdbcType="TINYINT" property="flag"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="prefix" jdbcType="VARCHAR" property="prefix"/>
+    </resultMap>
+
+    <select id="findByMenuList" resultType="com.baibei.shiyi.admin.modules.system.bean.vo.MenuVo">
+        select
+        id as id,
+        `name` as name,
+        component as component,
+        pid as pid,
+        seq as seq,
+        icon as icon,
+        path as path,
+        menu_type as menuType,
+        case
+        when menu_type='directory' then '目录'
+        when menu_type='button'then '按钮'
+        when menu_type='menu' then '菜单'
+        end as menuTypeText,
+        permission as permission,
+        hidden as hidden,
+        remark as remark
+        from
+        tbl_admin_menu
+        <where>
+            flag=1
+            <if test="name!=null and name!=''">
+                and `name` like CONCAT('%',#{name},'%')
+            </if>
+            <if test="hidden!=null and hidden!=''">
+                and hidden=#{hidden}
+            </if>
+            <if test="menuType!=null and menuType!=''">
+                and menu_type=#{menuType}
+            </if>
+            <if test="pid!=null">
+                and pid=#{pid}
+            </if>
+        </where>
+        order by if(isnull(seq),0,1) asc, seq ASC,
+        create_time DESC
+    </select>
+
+    <select id="findByPidMenuList" resultType="com.baibei.shiyi.admin.modules.system.bean.vo.MenuVo">
+        select
+        id as id,
+        `name` as name,
+        component as component,
+        pid as pid,
+        seq as seq,
+        icon as icon,
+        path as path,
+        menu_type as menuType,
+        case
+        when menu_type='directory' then '目录'
+        when menu_type='button'then '按钮'
+        when menu_type='menu' then '菜单'
+        end as menuTypeText,
+        permission as permission,
+        hidden as hidden,
+        remark as remark
+        from
+        tbl_admin_menu
+        <where>
+            flag=1
+            and pid=#{pid}
+        </where>
+        order by if(isnull(seq),0,1) asc, seq ASC,
+        create_time DESC
+    </select>
+
+    <select id="findByMenuType" resultType="com.baibei.shiyi.admin.modules.system.bean.vo.MenuVo">
+        select
+        id as id,
+        `name` as name,
+        component as component,
+        pid as pid,
+        seq as seq,
+        icon as icon,
+        path as path,
+        menu_type as menuType,
+        permission as permission,
+        hidden as hidden
+        from
+        tbl_admin_menu
+        <where>
+            flag=1
+            and menu_type=#{menuType}
+        </where>
+        order by if(isnull(seq),0,1) asc, seq ASC,
+        create_time DESC
+    </select>
+
+    <select id="findByMenuTypeList" resultType="com.baibei.shiyi.admin.modules.system.bean.vo.MenuVo"
+            parameterType="java.lang.Iterable">
+        select
+        id as id,
+        `name` as name,
+        component as component,
+        pid as pid,
+        seq as seq,
+        icon as icon,
+        path as path,
+        menu_type as menuType,
+        permission as permission,
+        hidden as hidden
+        from
+        tbl_admin_menu
+        <where>
+            id in
+            <foreach collection="menuIds" item="id" open="(" close=")" separator=",">
+            #{id}
+            </foreach>
+            and flag =1
+        </where>
+        order by if(isnull(seq),0,1) asc,seq ASC,
+        create_time DESC
+    </select>
+</mapper>

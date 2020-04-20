@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.admin.modules.account.dao.AccountBalanceMapper">
+    <resultMap id="BaseResultMap" type="com.baibei.shiyi.admin.modules.account.model.AccountBalance">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <result column="id" jdbcType="BIGINT" property="id"/>
+        <result column="customer_no" jdbcType="VARCHAR" property="customerNo"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="balance" jdbcType="DECIMAL" property="balance"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="flag" jdbcType="TINYINT" property="flag"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="balance_type" jdbcType="VARCHAR" property="balanceType"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="execution_time" jdbcType="TIMESTAMP" property="executionTime"/>
+        <result column="remarks" jdbcType="VARCHAR" property="remarks"/>
+        <result column="execution_by" jdbcType="VARCHAR" property="executionBy"/>
+        <result column="batch_no" jdbcType="VARCHAR" property="batchNo"></result>
+        <result column="order_no" jdbcType="VARCHAR" property="orderNo"></result>
+    </resultMap>
+
+    <sql id="baseColumn">
+        id ,
+        customer_no,
+        phone,
+        balance,
+        create_time,
+        create_by,
+        balance_type,
+        status,
+        execution_time,
+        remarks,
+        execution_by,
+        from tbl_admin_account_balance
+    </sql>
+
+    <select id="findPageList" resultType="com.baibei.shiyi.admin.modules.account.bean.vo.AccountBalanceVo">
+        select
+        id as id,
+        customer_no as customerNo,
+        phone as phone,
+        balance as balance,
+        create_time as createTime,
+        create_by as createBy,
+        balance_type as balanceType,
+        batch_no as batchNo,
+        case
+        when balance_type='in' then '转入'
+        when balance_type='out'then '转出'
+        end as balanceTypeText,
+        status as status,
+        case
+        when status='wait' then '待执行'
+        when status='success'then '执行成功'
+        when status='fail' then '执行失败'
+        when status='timeout'then '超时'
+        end as statusText,
+        execution_time as executionTime,
+        remarks as remark,
+        execution_by as executeBy
+        from tbl_admin_account_balance
+        <where>
+            flag =1
+            <if test="phone!=null and phone!=''">
+                and phone=#{phone}
+            </if>
+            <if test="balanceType!=null and balanceType!=''">
+                and balance_type=#{balanceType}
+            </if>
+            <if test="startTime!=null">
+                and
+                <![CDATA[DATE_FORMAT(create_time ,'%Y-%m-%d')>= DATE_FORMAT(#{startTime},'%Y-%m-%d')]]>
+            </if>
+            <if test="endTime!=null">
+                and
+                <![CDATA[DATE_FORMAT(create_time,'%Y-%m-%d')<=DATE_FORMAT(#{endTime},'%Y-%m-%d')]]>
+            </if>
+            <if test="status!=null and status!=''">
+                and status=#{status}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="duplicateList" resultType="com.baibei.shiyi.admin.modules.account.bean.vo.AccountBalanceVo">
+        select
+        id as id ,
+        customer_no as customerNo,
+        phone as phone,
+        balance as balance,
+        create_time as createTime,
+        create_by as createBy,
+        balance_type as balanceType,
+        batch_no as batchNo
+        FROM
+        tbl_admin_account_balance
+        <where>
+            flag =1
+            and customer_no=#{customerNo}
+            and balance_type=#{balanceType}
+            and balance=#{balance}
+            and DATE(create_time)=DATE(now())
+        </where>
+    </select>
+</mapper>

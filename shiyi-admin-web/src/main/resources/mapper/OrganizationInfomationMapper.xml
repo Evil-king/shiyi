@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.admin.modules.system.dao.OrganizationInfomationMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.admin.modules.system.model.OrganizationInfomation">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="business_type" jdbcType="VARCHAR" property="businessType" />
+    <result column="business_license" jdbcType="VARCHAR" property="businessLicense" />
+    <result column="organization_code_certificate" jdbcType="VARCHAR" property="organizationCodeCertificate" />
+    <result column="company_name" jdbcType="VARCHAR" property="companyName" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="id_card" jdbcType="CHAR" property="idCard" />
+    <result column="return_account" jdbcType="VARCHAR" property="returnAccount" />
+    <result column="rebate_freeze_ratio" jdbcType="REAL" property="rebateFreezeRatio" />
+    <result column="agent_area" jdbcType="VARCHAR" property="agentArea" />
+    <result column="referrer" jdbcType="BIGINT" property="referrer" />
+    <result column="organization_id" jdbcType="BIGINT" property="organizationId" />
+    <result column="tax_registration_certificate" jdbcType="VARCHAR" property="taxRegistrationCertificate" />
+    <result column="agent_area_city" jdbcType="VARCHAR" property="agentAreaCity"/>
+    <result column="agent_area_province" jdbcType="VARCHAR" property="agentAreaProvince"/>
+    <result column="agent_area_region" jdbcType="VARCHAR" property="agentAreaRegion"/>
+  </resultMap>
+</mapper>

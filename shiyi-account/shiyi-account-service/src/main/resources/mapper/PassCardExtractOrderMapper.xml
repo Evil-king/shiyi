@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.account.dao.PassCardExtractOrderMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.account.model.PassCardExtractOrder">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="extract_customer_no" jdbcType="VARCHAR" property="extractCustomerNo" />
+    <result column="order_no" jdbcType="VARCHAR" property="orderNo" />
+    <result column="operator_name" jdbcType="VARCHAR" property="operatorName" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="service_charge" jdbcType="DECIMAL" property="serviceCharge" />
+    <result column="total_price" jdbcType="DECIMAL" property="totalPrice" />
+    <result column="amount" jdbcType="INTEGER" property="amount" />
+    <result column="price" jdbcType="DECIMAL" property="price" />
+    <result column="product_name" jdbcType="VARCHAR" property="productName" />
+    <result column="product_trade_no" jdbcType="VARCHAR" property="productTradeNo" />
+    <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+  <select id="getPageList" resultType="com.baibei.shiyi.account.feign.bean.vo.PassCardExtractOrderListVo" parameterType="com.baibei.shiyi.account.feign.bean.dto.PassCardExtractOrderListDto">
+          SELECT
+	id,
+	order_no orderNo,
+	customer_no customerNo,
+	extract_customer_no extractCustomerNo,
+	product_trade_no productTradeNo,
+	product_name productName,
+	price,
+	amount,
+	total_price totalPrice,
+	service_charge serviceCharge,
+	status,
+    DATE_FORMAT(create_time,'%Y-%m-%d %H:%i:%s') createTime,
+	operator_name operatorName
+FROM
+	tbl_pass_card_extract_order
+	where 1=1
+    <if test="customerNo !='' and customerNo!=null ">
+      and customer_no=#{customerNo}
+    </if>
+    <if test="orderNo !='' and orderNo!=null ">
+      and order_no=#{orderNo}
+    </if>
+      <if test="status !='' and status!=null ">
+          and status=#{status}
+      </if>
+    <if test="startTime!=null and startTime!=''">
+      and create_time &gt;= STR_TO_DATE(concat(#{startTime},' 00:00:00'),'%Y-%m-%d %H:%i:%s')
+    </if>
+    <if test="endTime!=null and endTime!=''">
+      and create_time &lt;= STR_TO_DATE(concat(#{endTime},' 23:59:59'),'%Y-%m-%d %H:%i:%s')
+    </if>
+    order by create_time DESC,id
+  </select>
+    <select id="findNotAuditOrder" parameterType="integer" resultType="long">
+        SELECT
+        id
+        FROM
+        tbl_pass_card_extract_order o
+        WHERE
+        DATE(o.create_time) = CURDATE()
+        AND o.`status` = 'wait'
+        AND NOT EXISTS (
+        SELECT
+        a.customer_no
+        FROM
+        (
+        SELECT
+        o1.customer_no customer_no
+        FROM
+        tbl_pass_card_extract_order o1
+        WHERE
+        DATE(o1.create_time) = CURDATE()
+        AND o1. STATUS &lt;&gt; 'fail'
+        GROUP BY
+        o1.customer_no
+        HAVING
+        sum(o1.amount) > #{amount}
+        ) a
+        WHERE
+        a.customer_no = o.customer_no
+        )
+    </select>
+    <select id="selectUnfailCount" parameterType="string" resultType="integer">
+        select sum(amount)from tbl_pass_card_extract_order where customer_no=#{customerNo} and DATE(create_time) = CURDATE() and status &lt;&gt;'fail' GROUP BY customer_no
+    </select>
+</mapper>

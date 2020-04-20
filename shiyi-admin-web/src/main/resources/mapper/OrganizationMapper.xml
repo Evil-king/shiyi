@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.admin.modules.system.dao.OrganizationMapper">
+    <resultMap id="BaseResultMap" type="com.baibei.shiyi.admin.modules.system.model.Organization">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="org_name" jdbcType="VARCHAR" property="orgName"/>
+        <result column="pid" jdbcType="BIGINT" property="pid"/>
+        <result column="sort" jdbcType="BIGINT" property="sort"/>
+        <result column="org_type" jdbcType="VARCHAR" property="orgType"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="modify_by" jdbcType="VARCHAR" property="modifyBy"/>
+        <result column="flag" jdbcType="TINYINT" property="flag"/>
+        <result column="org_code" jdbcType="VARCHAR" property="orgCode"/>
+        <result column="org_status" jdbcType="VARCHAR" property="orgStatus"/>
+        <result column="register_mobile" jdbcType="VARCHAR" property="registerMobile"/>
+        <result column="customer_no" jdbcType="VARCHAR" property="customerNO"/>
+    </resultMap>
+
+
+    <select id="businessPageList" resultType="com.baibei.shiyi.admin.modules.system.bean.vo.OrganizationBusinessVo"
+            parameterType="com.baibei.shiyi.admin.modules.system.bean.dto.OrganizationBusinessDto">
+        SELECT
+        o1.id id,
+        o1.org_code orgCode,
+        o1.org_name orgName,
+        o1.org_type orgType,
+        i.business_type businessType,
+        CASE
+        when i.business_type ='personal' then '个人'
+        when i.business_type ='enterprise' then '企业'
+        end as businessTypeText,
+        i.`name` name,
+        i.id_card idCard,
+        i.company_name companyName,
+        i.business_license businessLicense,
+        i.organization_code_certificate organizationCodeCertificate,
+        i.tax_registration_certificate taxRegistrationCertificate,
+        i.return_account returnAccount,
+        i.rebate_freeze_ratio rebateFreezeRatio,
+        o1.create_time createTime,
+        o2.org_name parentName
+        FROM
+        tbl_admin_organization o1
+        LEFT JOIN tbl_admin_organization o2 ON o1.pid = o2.id and o1.flag=1 and o2.flag=1
+        LEFT JOIN tbl_admin_organization_infomation i ON i.organization_id = o1.id
+        <where>
+        o1.org_type = #{orgType}
+        <if test="orgCode!=null and orgCode!=''">
+            and o1.org_code like CONCAT('%',#{orgCode},'%')
+        </if>
+        <if test="orgName!=null and orgName!=''">
+            and o1.org_name like CONCAT('%',#{orgName},'%')
+        </if>
+        </where>
+        order by o1.create_time desc
+    </select>
+
+    <sql id="baseAgencyColumn">
+        org.id as id,
+        org.org_name as orgName,
+        org.org_code as orgCode,
+        org.org_type as orgType,
+        orgInfo.business_type as businessType,
+        orgInfo.`name` as name,
+        CASE
+        when orgInfo.business_type ='personal' then '个人'
+        when orgInfo.business_type ='enterprise' then '企业'
+        end as businessTypeText,
+        orgInfo.id_card as idCard,
+        org.pid as pid,
+        orgInfo.company_name as companyName,
+        orgInfo.business_license as businessLicense,
+        orgInfo.organization_code_certificate as organizationCodeCertificate,
+        orgInfo.tax_registration_certificate as taxRegistrationCertificate,
+        orgInfo.rebate_freeze_ratio as rebateFreezeRatio,
+        orgInfo.return_account as returnAccount,
+        org.create_time as createTime,
+        o2.org_name as businessName,
+        o2.org_code as businessCode
+    </sql>
+
+    <select id="findByAgencyId" resultType="com.baibei.shiyi.admin.modules.system.bean.vo.OrganizationAgencyVo">
+        select
+        <include refid="baseAgencyColumn"/>
+        FROM
+        tbl_admin_organization org
+        LEFT JOIN tbl_admin_organization o2 ON org.pid = o2.id and org.flag=1 and o2.flag=1
+        LEFT JOIN tbl_admin_organization_infomation orgInfo ON orgInfo.organization_id = org.id
+        <where>
+            org.id=#{orgId}
+            and org.flag=1
+        </where>
+    </select>
+
+
+    <select id="agencyPageList"
+            resultType="com.baibei.shiyi.admin.modules.system.bean.vo.OrganizationAgencyVo">
+        SELECT
+        <include refid="baseAgencyColumn"/>
+        FROM
+        tbl_admin_organization org
+        LEFT JOIN tbl_admin_organization o2 ON org.pid = o2.id and org.flag=1 and o2.flag=1
+        LEFT JOIN tbl_admin_organization_infomation orgInfo ON orgInfo.organization_id = org.id
+        WHERE
+        org.org_type = #{orgType}
+        and org.flag=1
+        <if test="orgCode!=null and orgCode!=''">
+            and org.org_code like CONCAT('%',#{orgCode},'%')
+        </if>
+        <if test="orgName!=null and orgName!=''">
+            and org.org_name like CONCAT('%',#{orgName},'%')
+        </if>
+        order by org.create_time desc
+    </select>
+
+
+
+    <sql id="baseBranchCompanyColumn">
+        org.id as id,
+        org.org_name as orgName,
+        org.org_code as orgCode,
+        org.org_type as orgType,
+        orgInfo.business_type as businessType,
+        org.pid as pid,
+        CASE
+        when orgInfo.business_type ='personal' then '个人'
+        when orgInfo.business_type ='enterprise' then '企业'
+        end as businessTypeText,
+        orgInfo.`name` as name,
+        orgInfo.id_card as idCard,
+        orgInfo.company_name as companyName,
+        orgInfo.business_license as businessLicense,
+        orgInfo.organization_code_certificate as organizationCodeCertificate,
+        orgInfo.tax_registration_certificate as taxRegistrationCertificate,
+        org.create_time as createTime,
+        o2.org_name as organizationName
+    </sql>
+    <select id="findByBranchCompanyPageList"
+            resultType="com.baibei.shiyi.admin.modules.system.bean.vo.OrganizationBranchVo">
+        select
+        <include refid="baseBranchCompanyColumn"/>
+        from
+        tbl_admin_organization org LEFT JOIN tbl_admin_organization o2 ON org.pid = o2.id and org.flag=1 and o2.flag=1
+        left join tbl_admin_organization_infomation orgInfo on
+        orgInfo.organization_id=org.id
+        <where>
+            org.flag=1
+            and org.org_type=#{orgType}
+            <if test="orgCode!=null and orgCode !=''">
+                and org.org_code like CONCAT('%',#{orgCode},'%')
+            </if>
+            <if test="orgName!=null and orgName !=''">
+                and org.org_name like CONCAT('%',#{orgName},'%')
+            </if>
+        </where>
+        order by org.create_time desc
+    </select>
+
+    <select id="findByOneBranchCompanyId"
+            resultType="com.baibei.shiyi.admin.modules.system.bean.vo.OrganizationBranchVo">
+        select
+        <include refid="baseBranchCompanyColumn"/>
+        FROM
+        tbl_admin_organization org LEFT JOIN tbl_admin_organization o2 ON org.pid = o2.id and org.flag=1 and o2.flag=1
+        left join tbl_admin_organization_infomation orgInfo
+        on org.id=orgInfo.organization_id
+        <where>
+            org.id=#{branchCompanyId}
+        </where>
+    </select>
+
+
+    <select id="findByAllFather"
+            resultType="com.baibei.shiyi.admin.modules.system.bean.vo.OrganizationBusinessVo">
+        select
+        org.id as id,
+        org.org_name as orgName,
+        org.org_code as orgCode,
+        org.org_type as orgType,
+        org.pid as pid,
+        orgInfo.business_type as businessType,
+        orgInfo.`name` as name,
+        orgInfo.id_card as idCard,
+        orgInfo.company_name as companyName,
+        orgInfo.business_license as businessLicense,
+        orgInfo.organization_code_certificate as organizationCodeCertificate,
+        orgInfo.tax_registration_certificate as taxRegistrationCertificate,
+        org.create_time as createTime
+        FROM
+        tbl_admin_organization org left join
+        tbl_admin_organization_infomation orgInfo on orgInfo.organization_id=org.id
+        <where>
+            FIND_IN_SET(org.id,queryChildrenAreaInfo1(#{childrenId}))
+            and org.flag=1
+        </where>
+    </select>
+
+    <select id="findByBusinessId"
+            resultType="com.baibei.shiyi.admin.modules.system.bean.vo.OrganizationBusinessVo">
+        select
+        org.id as id,
+        org.org_name as orgName,
+        org.org_code as orgCode,
+        org.org_type as orgType,
+        org.pid as pid,
+        orgInfo.business_type as businessType,
+        orgInfo.`name` as name,
+        orgInfo.id_card as idCard,
+        orgInfo.company_name as companyName,
+        orgInfo.business_license as businessLicense,
+        orgInfo.organization_code_certificate as organizationCodeCertificate,
+        orgInfo.tax_registration_certificate as taxRegistrationCertificate,
+        org.create_time as createTime
+        FROM
+        tbl_admin_organization org left join
+        tbl_admin_organization_infomation orgInfo on orgInfo.organization_id=org.id
+        <where>
+            org.id=#{orgId}
+            and org.flag=1
+        </where>
+    </select>
+
+
+
+    <select id="findByBranchCompanyId" resultMap="BaseResultMap">
+        select
+        org.id,
+        org.org_name,
+        org.pid,
+        org.org_type,
+        org.create_time,
+        org.create_by,
+        org.modify_time,
+        org.modify_by,
+        org.flag,
+        org.org_code,
+        org.org_status,
+        org.register_mobile
+        FROM tbl_admin_branch_office_proxy proxy left join tbl_admin_organization org on proxy.organization_id=org.id
+        <where>
+            org.flag=1
+            and proxy.branch_company_id=#{branchCompanyId}
+            and org.org_type=#{orgType}
+        </where>
+    </select>
+
+    <select id="findByBranchCompanyIdAndPid" resultMap="BaseResultMap">
+        select
+        org.id,
+        org.org_name,
+        org.pid,
+        org.org_type,
+        org.create_time,
+        org.create_by,
+        org.modify_time,
+        org.modify_by,
+        org.flag,
+        org.org_code,
+        org.org_status,
+        org.register_mobile
+        FROM tbl_admin_branch_office_proxy proxy left join tbl_admin_organization org on proxy.organization_id=org.id
+        <where>
+            org.flag=1
+            and proxy.branch_company_id=#{branchCompanyId}
+            and org.pid=#{pid}
+        </where>
+    </select>
+
+
+    <sql id="baseProxyColumn">
+        org.id as id,
+        org.org_name as orgName,
+        org.org_code as orgCode,
+        org.org_type as orgType,
+        CASE
+        when org.org_type ='cityAgent' then '市代理'
+        when org.org_type ='areaAgent' then '区代理'
+        when org.org_type ='ordinaryAgent' then '普通代理'
+        end as orgTypeText,
+        org.pid as pid,
+        orgInfo.business_type as businessType,
+        CASE
+        when orgInfo.business_type ='personal' then '个人'
+        when orgInfo.business_type ='enterprise' then '企业'
+        end as businessTypeText,
+        orgInfo.`name` as name,
+        orgInfo.id_card as idCard,
+        orgInfo.company_name as companyName,
+        orgInfo.business_license as businessLicense,
+        orgInfo.organization_code_certificate as organizationCodeCertificate,
+        orgInfo.tax_registration_certificate as taxRegistrationCertificate,
+        orgInfo.agent_area as agentArea,
+        org.create_time as createTime,
+        orgInfo.referrer as referrer,
+        orgInfo.return_account as returnAccount,
+        orgInfo.rebate_freeze_ratio as rebateFreezeRatio,
+        orgInfo.agent_area_province as agentAreaProvince,
+        orgInfo.agent_area_city as agentAreaCity,
+        orgInfo.agent_area_region as agentAreaRegion,
+        org.register_mobile as registerMobile
+    </sql>
+    <!--分公司代理-->
+    <select id="findByProxyList"
+            resultType="com.baibei.shiyi.admin.modules.system.bean.vo.OrganizationProxyVo">
+        select
+        <include refid="baseProxyColumn"/>
+        from
+        tbl_admin_organization org left join tbl_admin_organization_infomation orgInfo
+        on org.id=orgInfo.organization_id
+        <where>
+            org.flag=1
+            and <![CDATA[(org.org_type<>'branchOffice' and org.org_type<>'business' and org.org_type<>'organization')]]>
+            <if test="orgType!=null and orgType!=''">
+                and org.org_type=#{orgType}
+            </if>
+            <if test="orgCode!=null and orgCode !=''">
+                and org.org_code like CONCAT('%',#{orgCode},"%")
+            </if>
+            <if test="orgName!=null and orgName !=''">
+                and org.org_name like CONCAT('%',#{orgName},'%')
+            </if>
+            <if test="registerMobile!=null and registerMobile!=''">
+                and org.register_mobile like CONCAT('%',#{registerMobile},'%')
+            </if>
+        </where>
+        order by org.create_time desc
+    </select>
+
+
+    <select id="findOneProxyById"
+            resultType="com.baibei.shiyi.admin.modules.system.bean.vo.OrganizationProxyVo">
+        select
+        <include refid="baseProxyColumn"/>
+        from tbl_admin_organization org left join tbl_admin_organization_infomation orgInfo
+        on org.id=orgInfo.organization_id
+        <where>
+            org.id=#{proxyId}
+        </where>
+    </select>
+
+
+</mapper>
