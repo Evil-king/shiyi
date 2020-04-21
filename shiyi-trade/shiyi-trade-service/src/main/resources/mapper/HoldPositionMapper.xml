@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.trade.dao.HoldPositionMapper">
+    <resultMap id="BaseResultMap" type="com.baibei.shiyi.trade.model.HoldPosition">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="customer_no" jdbcType="VARCHAR" property="customerNo"/>
+        <result column="customer_name" jdbcType="VARCHAR" property="customerName"/>
+        <result column="product_trade_no" jdbcType="VARCHAR" property="productTradeNo"/>
+        <result column="remaind_count" jdbcType="INTEGER" property="remaindCount"/>
+        <result column="frozen_count" jdbcType="INTEGER" property="frozenCount"/>
+        <result column="can_sell_count" jdbcType="INTEGER" property="canSellCount"/>
+        <result column="lock_count" jdbcType="INTEGER" property="lockCount"/>
+        <result column="cost_price" jdbcType="DECIMAL" property="costPrice"/>
+        <result column="version" jdbcType="INTEGER" property="version"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="flag" jdbcType="TINYINT" property="flag"/>
+    </resultMap>
+
+
+    <select id="findPageList" resultType="com.baibei.shiyi.trade.feign.bean.vo.HoldPositionVo">
+        select
+        hold.customer_no as customerNo,
+        hold.customer_name as customerName,
+        hold.product_trade_no as productTradeNo,
+        product.product_name as productName,
+        hold.remaind_count as remaindCount,
+        hold.frozen_count as frozenCount,
+        hold.lock_count as lockCount,
+        hold.cost_price as costPrice,
+        hold.can_sell_count as canSellCount
+        from
+        tbl_tra_hold_position hold left join tbl_tra_product product on hold.product_trade_no=product.product_trade_no
+        <where>
+            hold.flag=1
+            <if test="customerNo!=null and customerNo!=''">
+                and hold.customer_no like CONCAT('%',#{customerNo},'%')
+            </if>
+
+            <if test="productTradeNo!=null and productTradeNo!=''">
+                and hold.product_trade_no like CONCAT('%',#{productTradeNo},'%')
+            </if>
+
+            <if test="excludeUsers!=null and excludeUsers!=''">
+                and NOT EXISTS(select holdPosition.customer_no from tbl_tra_hold_position holdPosition where hold.customer_no=holdPosition.customer_no and holdPosition.flag =1 and find_in_set(holdPosition.customer_no,#{excludeUsers}))
+            </if>
+        </where>
+        order by hold.create_time desc,hold.id
+    </select>
+
+
+    <select id="getTotalMarketValue" resultType="com.baibei.shiyi.trade.common.vo.TotalMarketValueVo">
+        select CAST(sum(${lastPrice}*(remaind_count)) AS DECIMAL(20,2)) totalMarketValue,
+              CAST(sum((${lastPrice}-cost_price)*(remaind_count)) AS DECIMAL(20,2)) totalProfitAndLoss
+        from tbl_tra_hold_position where customer_no=#{customerNo} and product_trade_no=#{productTradeNo}
+  </select>
+
+
+    <select id="getPageList" resultType="com.baibei.shiyi.trade.common.vo.HoldDetailListVo">
+    SELECT
+    d.id,
+	d.customer_no customerNo,
+	d.product_trade_no productTradeNo,
+	p.product_name productName,
+	d.can_sell_count as canSellCount,
+	d.remaind_count AS remaindCount,
+	d.cost_price AS costPrice,
+	${lastPrice} AS lastPrice,
+	CAST(((d.remaind_count)*${lastPrice}) AS DECIMAL(20,2)) marketValue,
+	CAST(((d.remaind_count)*(${lastPrice}-d.cost_price)) AS DECIMAL(20,2)) profitAndLoss,
+	p.product_icon productImg
+    FROM
+	tbl_tra_hold_position d,tbl_tra_product p where d.product_trade_no=p.product_trade_no and d.customer_no=#{customerNo}
+	and d.product_trade_no=#{productTradeNo}
+    order by d.create_time ASC,d.id
+    </select>
+    <select id="sumCanSellCount" resultType="java.lang.Integer">
+        SELECT SUM(p.can_sell_count) FROM tbl_tra_hold_position p where p.product_trade_no=#{productTradeNo}
+    </select>
+
+
+</mapper>

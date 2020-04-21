@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.trade.dao.EntrustOrderMapper">
+    <resultMap id="BaseResultMap" type="com.baibei.shiyi.trade.model.EntrustOrder">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+        <result column="customer_name" jdbcType="VARCHAR" property="customerName" />
+        <result column="product_trade_no" jdbcType="VARCHAR" property="productTradeNo" />
+        <result column="entrust_no" jdbcType="VARCHAR" property="entrustNo" />
+        <result column="entrust_time" jdbcType="TIMESTAMP" property="entrustTime" />
+        <result column="direction" jdbcType="VARCHAR" property="direction" />
+        <result column="price" jdbcType="DECIMAL" property="price" />
+        <result column="entrust_count" jdbcType="INTEGER" property="entrustCount" />
+        <result column="wait_count" jdbcType="INTEGER" property="waitCount" />
+        <result column="deal_count" jdbcType="INTEGER" property="dealCount" />
+        <result column="revoke_count" jdbcType="INTEGER" property="revokeCount" />
+        <result column="result" jdbcType="VARCHAR" property="result" />
+        <result column="anonymous_flag" jdbcType="TINYINT" property="anonymousFlag" />
+        <result column="change_amount" jdbcType="DECIMAL" property="changeAmount" />
+        <result column="buy_fee" jdbcType="DECIMAL" property="buyFee" />
+        <result column="status" jdbcType="VARCHAR" property="status" />
+        <result column="reason" jdbcType="VARCHAR" property="reason" />
+        <result column="remark" jdbcType="VARCHAR" property="remark" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+        <result column="flag" jdbcType="TINYINT" property="flag" />
+    </resultMap>
+
+    <resultMap id="EntrustOrdetListMap" type="com.baibei.shiyi.trade.common.vo.EntrustOrderListVo">
+        <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+        <result column="customer_name" jdbcType="VARCHAR" property="customerName" />
+        <result column="product_name" jdbcType="VARCHAR" property="productName" />
+        <result column="product_trade_no" jdbcType="VARCHAR" property="productTradeNo" />
+        <result column="entrust_no" jdbcType="VARCHAR" property="entrustNo" />
+        <result column="direction" jdbcType="VARCHAR" property="direction" />
+        <result column="price" jdbcType="DECIMAL" property="price" />
+        <result column="entrust_count" jdbcType="INTEGER" property="entrustCount" />
+        <result column="anonymous_flag" jdbcType="TINYINT" property="anonymousFlag" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="entrustTime" />
+        <result column="deal_count" jdbcType="INTEGER" property="dealCount" />
+        <result column="wait_count" jdbcType="INTEGER" property="waitCount" />
+    </resultMap>
+    <select id="entrustOrderList" parameterType="java.util.Map" resultMap="EntrustOrdetListMap">
+        SELECT
+        o.customer_no,
+        o.customer_name,
+        p.product_name,
+        o.product_trade_no,
+        o.entrust_no,
+        o.direction,
+        o.price,
+        o.entrust_count,
+        o.anonymous_flag,
+        o.create_time,
+        o.deal_count,
+        o.wait_count
+    FROM
+        tbl_tra_entrust_order o
+        LEFT JOIN tbl_tra_product p ON o.product_trade_no = p.product_trade_no
+    WHERE
+        o.flag = 1
+        AND p.flag = 1
+        AND o.direction = #{direction}
+        AND o.product_trade_no = #{productTradeNo}
+        AND o.result = #{result}
+        <if test="price != null and price != ''">
+            AND o.price = #{price}
+        </if>
+        ORDER BY o.entrust_time DESC
+    </select>
+
+    <select id="myEntrustList" resultType="com.baibei.shiyi.trade.common.vo.MyEntrustOrderVo">
+     select
+      e.entrust_no,
+      e.product_trade_no AS productTradeNo,
+      e.direction,
+      e.entrust_count - e.deal_count AS revokeCount,
+      e.price,
+      e.price * (e.entrust_count - e.deal_count) AS totalPrice,
+      e.result,
+      e.create_time AS createTime,
+      p.product_icon AS productImg,
+      p.product_name AS productName
+      from tbl_tra_entrust_order e left join tbl_tra_product p
+      on  e.product_trade_no = p.product_trade_no  where e.result ='wait_deal'
+      and e.customer_no =#{customerNo}
+      order by e.create_time desc
+    </select>
+  <select id="myEntrustDetails" resultType="com.baibei.shiyi.trade.common.vo.MyEntrustDetailsVo">
+    select
+      o.customer_no AS customerNo,
+      o.entrust_no AS entrustNo,
+      o.product_trade_no AS productTradeNo,
+      m.product_trade_name AS productName,
+      o.price,
+      (o.entrust_count-o.deal_count) AS entrustCount
+      FROM
+        tbl_tra_entrust_order o
+    LEFT JOIN tbl_tra_product m ON o.product_trade_no = m.product_trade_no
+     WHERE
+       o.id = #{entrustId}
+     ORDER BY
+        o.entrust_time asc
+  </select>
+    <select id="revokeList" resultType="com.baibei.shiyi.trade.common.vo.RevokeListVo">
+      select
+      e.entrust_no,
+      e.product_trade_no AS productTradeNo,
+      e.direction,
+      e.entrust_count - e.deal_count AS revokeCount,
+      e.price,
+      e.price * (e.entrust_count - e.deal_count) AS totalPrice,
+      e.result,
+      e.create_time AS createTime,
+      p.product_icon AS productImg,
+      p.product_name AS productName
+      from tbl_tra_entrust_order e left join tbl_tra_product p
+      on  e.product_trade_no = p.product_trade_no  where (e.result ='wait_deal' or e.result ='some_deal')
+      and e.customer_no =#{customerNo}
+      order by e.create_time desc
+    </select>
+  <select id="mypageList" parameterType="com.baibei.shiyi.trade.feign.bean.dto.CustomerEntrustOrderListDto" resultType="com.baibei.shiyi.trade.feign.bean.vo.CustomerEntrustOrderListVo">
+    SELECT
+	o.customer_no customerNo,
+    DATE_FORMAT(o.create_time,'%Y-%m-%d %H:%i:%s') createTime,
+	o.direction direction,
+	o.product_trade_no productTradeNo,
+	p.product_name productName,
+	o.price price,
+	o.entrust_count entrustCount,
+	CAST(o.price*o.entrust_count AS DECIMAL(20,2)) totalPrice,
+	o.deal_count dealCount,
+	o.revoke_count revokeCount,
+	o.entrust_no entrustNo,
+	o.result result
+FROM
+	tbl_tra_entrust_order o,
+	tbl_tra_product p
+WHERE
+	o.product_trade_no = p.product_trade_no
+    <if test="customerNo !='' and customerNo!=null ">
+      and o.customer_no=#{customerNo}
+    </if>
+    <if test="startTime!=null and startTime!=''">
+      and o.create_time &gt;= STR_TO_DATE(concat(#{startTime},' 00:00:00'),'%Y-%m-%d %H:%i:%s')
+    </if>
+    <if test="endTime!=null and endTime!=''">
+      and o.create_time &lt;= STR_TO_DATE(concat(#{endTime},' 23:59:59'),'%Y-%m-%d %H:%i:%s')
+    </if>
+    <if test="direction !='' and direction!=null ">
+      and o.direction=#{direction}
+    </if>
+    <if test="productTradeNo !='' and productTradeNo!=null ">
+      and o.product_trade_no=#{productTradeNo}
+    </if>
+    <if test="entrustNo !='' and entrustNo!=null ">
+      and o.entrust_no=#{entrustNo}
+    </if>
+    <if test="result !='' and result!=null ">
+      and o.result=#{result}
+    </if>
+    order by o.create_time DESC,o.id
+  </select>
+    <select id="myPcEntrustList" resultType="com.baibei.shiyi.trade.common.vo.MyEntrustOrderVo">
+        select
+      e.entrust_no,
+      e.product_trade_no AS productTradeNo,
+      e.direction,
+      e.entrust_count - e.deal_count AS revokeCount,
+      e.price,
+      e.price * (e.entrust_count - e.deal_count) AS totalPrice,
+      e.result,
+      e.create_time AS createTime,
+      p.product_icon AS productImg,
+      p.product_name AS productName
+      from tbl_tra_entrust_order e left join tbl_tra_product p
+      on  e.product_trade_no = p.product_trade_no  where e.customer_no =#{customerNo}
+      <if test="productTradeNo !=null and productTradeNo !=''">
+          and e.product_trade_no = #{productTradeNo}
+      </if>
+      <if test="direction != null and direction !=''">
+        and e.direction =#{direction}
+      </if>
+      order by e.create_time desc
+    </select>
+    <select id="myPcEntrustListAndCustomerNo" resultType="com.baibei.shiyi.trade.common.vo.MyEntrustOrderVo">
+      select
+      e.entrust_no,
+      e.product_trade_no AS productTradeNo,
+      e.direction,
+      e.entrust_count - e.deal_count AS revokeCount,
+      e.price,
+      e.price * (e.entrust_count - e.deal_count) AS totalPrice,
+      e.result,
+      e.create_time AS createTime,
+      e.modify_time AS modifyTime,
+      p.product_icon AS productImg,
+      p.product_name AS productName
+      from tbl_tra_entrust_order e left join tbl_tra_product p
+      on  e.product_trade_no = p.product_trade_no  where e.customer_no =#{customerNo}
+      <if test="startTime!=null and startTime!=''">
+        and e.create_time &gt;= STR_TO_DATE(concat(#{startTime},' 00:00:00'),'%Y-%m-%d %H:%i:%s')
+      </if>
+      <if test="endTime!=null and endTime!=''">
+        and e.create_time &lt;= STR_TO_DATE(concat(#{endTime},' 23:59:59'),'%Y-%m-%d %H:%i:%s')
+      </if>
+      order by e.create_time desc
+    </select>
+</mapper>

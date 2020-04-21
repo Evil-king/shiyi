@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.order.dao.AfterSaleGoodsMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.order.model.AfterSaleGoods">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="image" jdbcType="VARCHAR" property="image" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="amount" jdbcType="DECIMAL" property="amount" />
+    <result column="spu_no" jdbcType="VARCHAR" property="spuNo" />
+    <result column="skuProperty" jdbcType="VARCHAR" property="skuproperty" />
+    <result column="quantity" jdbcType="INTEGER" property="quantity" />
+    <result column="product_id" jdbcType="BIGINT" property="productId" />
+    <result column="server_no" jdbcType="VARCHAR" property="serverNo" />
+    <result column="order_item_no" jdbcType="VARCHAR" property="orderItemNo" />
+    <result column="shelf_type" jdbcType="VARCHAR" property="shelfType" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+    <update id="updateTypeByOrderItemNo">
+      update tbl_aftersale_goods set
+      type = #{type},modify_time = now() where order_item_no = #{orderItemNo}
+    </update>
+    <select id="selectByOrderItemNoTypeIsNotNull" resultType="com.baibei.shiyi.order.common.vo.ApiAfterSalePageListVo">
+      SELECT g.image,g.name,g.quantity,g.skuProperty,o.type,g.order_item_no as orderItemNo FROM tbl_aftersale_goods g LEFT JOIN tbl_aftersale_order o ON g.order_item_no = o.order_item_no
+	where o.customer_no=#{customerNo} and o.`status` != 'fail' and o.type IS NOT NULL GROUP BY g.order_item_no ORDER BY g.create_time DESC
+    </select>
+</mapper>

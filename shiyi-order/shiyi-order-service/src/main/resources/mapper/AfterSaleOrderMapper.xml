@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.order.dao.AfterSaleOrderMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.order.model.AfterSaleOrder">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="order_no" jdbcType="VARCHAR" property="orderNo" />
+    <result column="server_no" jdbcType="VARCHAR" property="serverNo" />
+    <result column="order_item_no" jdbcType="VARCHAR" property="orderItemNo" />
+    <result column="total_amount" jdbcType="DECIMAL" property="totalAmount" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="finish_time" jdbcType="TIMESTAMP" property="finishTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="application_time" jdbcType="TIMESTAMP" property="applicationTime" />
+    <result column="success_time" jdbcType="TIMESTAMP" property="successTime" />
+    <result column="doing_time" jdbcType="TIMESTAMP" property="doingTime" />
+    <result column="revoked_time" jdbcType="TIMESTAMP" property="revokedTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+    <update id="updateByParamsRefunded">
+      update tbl_aftersale_order set
+      status = #{status},finish_time = now() where server_no = #{serverNo} and status = 'doing'
+    </update>
+
+  <update id="updateByParamsReissued">
+      update tbl_aftersale_order set
+      status = #{status},finish_time = now() where server_no = #{serverNo} and status = 'doing'
+    </update>
+
+    <select id="pageList" resultType="com.baibei.shiyi.order.common.vo.AfterSaleOrderVo">
+      SELECT
+      order_no as orderNo,
+      server_no as serverNo,
+      order_item_no as orderItemNo,
+      DATE_FORMAT(create_time,'%Y-%m-%d %H:%i:%s') createTime,
+      DATE_FORMAT(finish_time,'%Y-%m-%d %H:%i:%s') finishTime,
+      customer_no as customerNo,
+      total_amount as totalAmount,
+      type,
+      status,
+      DATE_FORMAT(modify_time,'%Y-%m-%d %H:%i:%s') modifyTime
+      FROM tbl_aftersale_order
+      <where>
+        <if test="orderNo != null and orderNo !=''">
+          and order_no = #{orderNo}
+        </if>
+        <if test="orderItemNo != null and orderItemNo !=''">
+          and order_item_no = #{orderItemNo}
+        </if>
+        <if test="serverNo != null and serverNo !=''">
+          and server_no = #{serverNo}
+        </if>
+        <if test="customerNo != null and customerNo !=''">
+          and customer_no = #{customerNo}
+        </if>
+        <if test="createTime != null and createTime !=''">
+          and create_time like "%"#{createTime}"%"
+        </if>
+        <if test="type != null and type !=''">
+          and type = #{type}
+        </if>
+        <if test="status != null and status !=''">
+          and status = #{status}
+        </if>
+      </where>
+      order by create_time desc
+    </select>
+    <select id="selectByOrderItemNoToWaiting" resultMap="BaseResultMap">
+      select * from tbl_aftersale_order where status = 'waiting' and order_item_no = #{orderItemNo}
+    </select>
+  <select id="whetherToOpenAfterSaleOrder" resultType="java.lang.Integer">
+    select count(1) from tbl_aftersale_order where customer_no= #{customerNo}
+    and order_item_no = #{orderItemNo}
+  </select>
+  <select id="selectByOrderItemNoToStatus" resultType="java.lang.String">
+    select status from tbl_aftersale_order where customer_no= #{customerNo} and order_item_no = #{orderItemNo}
+  </select>
+  <select id="selectByOrderItemNoToStatusObject" resultType="com.baibei.shiyi.order.model.AfterSaleOrder">
+    select * from tbl_aftersale_order where order_item_no = #{orderItemNo} and status = 'success'
+  </select>
+    <select id="exportData" resultType="com.baibei.shiyi.order.feign.base.vo.AfterSaleOrderVo">
+      SELECT
+      order_no as orderNo,
+      server_no as serverNo,
+      order_item_no as orderItemNo,
+      DATE_FORMAT(create_time,'%Y-%m-%d %H:%i:%s') createTime,
+      DATE_FORMAT(finish_time,'%Y-%m-%d %H:%i:%s') finishTime,
+      customer_no as customerNo,
+      total_amount as totalAmount,
+      CASE
+      WHEN type = 'exchange'
+      THEN '换货申请'
+      WHEN type = 'refund'
+      THEN '退款申请'
+      END type,
+      CASE
+      WHEN status = 'init'
+      THEN
+      '待申请'
+      WHEN status = 'waiting'
+      THEN
+      '待审核'
+      WHEN status = 'revoked'
+      THEN
+      '撤销'
+      WHEN status = 'success'
+      THEN
+      '审核通过'
+      WHEN status = 'fail'
+      THEN
+      '审核不通过'
+      WHEN status = 'doing'
+      THEN
+      '待收货'
+      WHEN status = 'refunded'
+      THEN
+      '已退款'
+      WHEN status = 'reissued'
+      THEN
+      '已补发'
+      END status,
+      DATE_FORMAT(modify_time,'%Y-%m-%d %H:%i:%s') modifyTime
+      FROM tbl_aftersale_order
+      <where>
+      <if test="orderNo != null and orderNo !=''">
+        and order_no = #{orderNo}
+      </if>
+      <if test="orderItemNo != null and orderItemNo !=''">
+        and order_item_no = #{orderItemNo}
+      </if>
+      <if test="serverNo != null and serverNo !=''">
+        and server_no = #{serverNo}
+      </if>
+      <if test="customerNo != null and customerNo !=''">
+        and customer_no = #{customerNo}
+      </if>
+      <if test="createTime != null and createTime !=''">
+        and create_time = #{createTime}
+      </if>
+      <if test="type != null and type !=''">
+        and type = #{type}
+      </if>
+      <if test="status != null and status !=''">
+        and status = #{status}
+      </if>
+      </where>
+      order by create_time desc
+    </select>
+</mapper>

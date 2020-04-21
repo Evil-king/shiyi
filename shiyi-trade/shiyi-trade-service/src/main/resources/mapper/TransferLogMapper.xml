@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.trade.dao.TransferLogMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.trade.model.TransferLog">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="creator" jdbcType="VARCHAR" property="creator" />
+    <result column="modifier" jdbcType="VARCHAR" property="modifier" />
+    <result column="count_num" jdbcType="INTEGER" property="countNum" />
+    <result column="count_amount" jdbcType="DECIMAL" property="countAmount" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="isFee" jdbcType="TINYINT" property="isfee" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+    <select id="pageListLog" resultType="com.baibei.shiyi.trade.feign.bean.vo.TransferLogVo">
+      select
+      id,
+      name,
+      DATE_FORMAT(create_time,'%Y-%c-%d %H:%i:%S') as createTime,
+      DATE_FORMAT(modify_time,'%Y-%c-%d %H:%i:%S') as modifyTime,
+      count_num as countNum,
+      count_amount as countAmount,
+      status,
+      creator,
+      isFee,
+      modifier
+      from tbl_tra_transaction_transfer_log
+      where flag =1
+      <if test="name != null and name !=''">
+        and name = #{name}
+      </if>
+      <if test="status != null and status !=''">
+        and status = #{status}
+      </if>
+      <if test="startTime!=null and startTime!=''">
+        and create_time &gt;= #{startTime}
+      </if>
+      <if test="endTime!=null and endTime!=''">
+        and create_time &lt;= #{endTime}
+      </if>
+      order by create_time desc
+    </select>
+</mapper>

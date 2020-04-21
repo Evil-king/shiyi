@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.product.dao.ProductGroupRefMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.product.model.ProductGroupRef">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="shelf_id" jdbcType="BIGINT" property="shelfId" />
+    <result column="group_id" jdbcType="BIGINT" property="groupId" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+  <select id="myList" resultType="com.baibei.shiyi.product.feign.bean.vo.GroupProductVo">
+    <if test="groupType=='common'">
+      select t.*
+      from
+      (select
+      st.sell_count sellCount,
+      <include refid="com.baibei.shiyi.product.dao.CommonMapper.indexShelfColumn"/>
+      from tbl_pro_product_group_ref gr
+      inner join tbl_pro_product_shelf ps on gr.shelf_id=ps.id
+      INNER JOIN <include refid="com.baibei.shiyi.product.dao.CommonMapper.minShelfPriceSelect"/>
+      inner join tbl_pro_product p on ps.product_id=p.id
+      inner join
+      (select sk.product_id,sum(sk.sell_count) sell_count from  tbl_pro_product_stock sk group by sk.product_id) st
+      on p.id = st.product_id
+      where gr.group_id=#{groupId}
+      LIMIT ${viewCount}) t
+    </if>
+
+    <if test="groupType=='new' or groupType=='hot'">
+      select t.*
+      from
+      (SELECT
+      s.sellCount,
+      <include refid="com.baibei.shiyi.product.dao.CommonMapper.indexShelfColumn"/>
+      FROM
+      tbl_pro_product_shelf ps
+      INNER JOIN <include refid="com.baibei.shiyi.product.dao.CommonMapper.minShelfPriceSelect"/>
+      INNER JOIN tbl_pro_product p ON ps.product_id = p.id AND p.flag = 1
+      inner join
+      (
+      select stock.product_id,sum(stock.sell_count) sellCount
+      from tbl_pro_product_stock stock
+      group by stock.product_id) s on p.id=s.product_id
+      <if test="groupType=='hot'">
+        ORDER BY
+        s.sellCount DESC
+      </if>
+      <if test="groupType=='new'">
+        ORDER BY
+        ps.shelf_time DESC
+      </if>
+      LIMIT ${viewCount}
+      ) t
+    </if>
+
+
+  </select>
+
+</mapper>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.order.dao.OrderMapper">
+    <resultMap id="BaseResultMap" type="com.baibei.shiyi.order.model.Order">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="order_no" jdbcType="VARCHAR" property="orderNo"/>
+        <result column="customer_no" jdbcType="VARCHAR" property="customerNo"/>
+        <result column="freight_amount" jdbcType="DECIMAL" property="freightAmount"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="receiver_name" jdbcType="VARCHAR" property="receiverName"/>
+        <result column="receiver_phone" jdbcType="VARCHAR" property="receiverPhone"/>
+        <result column="receiver_province" jdbcType="VARCHAR" property="receiverProvince"/>
+        <result column="receiver_city" jdbcType="VARCHAR" property="receiverCity"/>
+        <result column="receiver_region" jdbcType="VARCHAR" property="receiverRegion"/>
+        <result column="receiver_detail_address" jdbcType="VARCHAR" property="receiverDetailAddress"/>
+        <result column="auto_cancel_time" jdbcType="TIMESTAMP" property="autoCancelTime"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="cancel_time" jdbcType="TIMESTAMP" property="cancelTime"/>
+        <result column="cancel_reason" jdbcType="VARCHAR" property="cancelReason"/>
+        <result column="pay_time" jdbcType="TIMESTAMP" property="payTime"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="flag" jdbcType="TINYINT" property="flag"/>
+    </resultMap>
+
+    <select id="unionAllList" parameterType="java.lang.String"
+            resultType="com.baibei.shiyi.order.common.vo.MyOrderTempVo">
+        select * from (
+        select t.id,t.order_no as orderNo,t.status as status,null as actualAmount,t.create_time as createTime
+        ,null as productName,null as productImg,'order' as type,null as skuProperty,null as quantity,null as shelfType
+        from tbl_ord_order t left join tbl_ord_order_item tItem on t.id=tItem.order_id where 1=1
+        <if test="orderStatus != null and orderStatus =='cancel'">
+            and t.status = 'cancel'
+        </if>
+        <if test="orderStatus == null">
+            and t.status in ('wait','cancel')
+        </if>
+        and IFNULL(tItem.id,0)=0
+        and t.flag = 1 and t.customer_no = #{customerNo}
+        union all
+        select it.id,it.order_item_no as orderNo,it.status as status,it.actual_amount as actualAmount ,it.create_time as
+        createTime,
+        it.product_name as productName,it.product_img as productImg,'orderItem' as type,it.sku_property as
+        skuProperty,it.quantity,it.shelf_type as shelfType
+        from tbl_ord_order_item it where it.customer_no = #{customerNo}
+        and it.flag = 1
+        <if test="orderItemStatus != null">
+            and it.status = #{orderItemStatus}
+        </if>
+        ) as tb
+        order by tb.createTime desc
+    </select>
+
+
+    <sql id="baseFilter">
+        flag=1
+        <if test="orderNo!=null and orderNo!=''">
+            and order_no=#{orderNo}
+        </if>
+        <if test="customerNo!=null and customerNo!=''">
+            and customer_no=#{customerNo}
+        </if>
+        <if test="createTime!=null">
+            and DATE_FORMAT(create_time,'%Y-%m-%d') = DATE_FORMAT(#{createTime},'%Y-%m-%d')
+        </if>
+        <if test="status!=null and status!=''">
+            and status=#{status}
+        </if>
+    </sql>
+
+    <select id="orderPageList" resultType="com.baibei.shiyi.order.feign.base.vo.AdminOrderVo">
+        select
+        o.id as Id,
+        o.order_no as orderNo,
+        o.pay_time as payTime,
+        o.create_time as createTime,
+        o.customer_no as customerNo,
+        CASE
+        WHEN o.status = 'wait'
+        THEN '待付款'
+        WHEN o.status = 'undelivery'
+        THEN '已付款'
+        WHEN o.status = 'cancel'
+        THEN '已取消'
+        WHEN o.status = 'completed'
+        THEN '已完成'
+        END status
+        FROM tbl_ord_order o
+        <where>
+            o.flag=1
+            <if test="orderNo!=null and orderNo!=''">
+                and o.order_no=#{orderNo}
+            </if>
+            <if test="payTime!=null and payTime!=''">
+                and o.pay_time=#{payTime}
+            </if>
+            <if test="customerNo!=null and customerNo!=''">
+                and o.customer_no=#{customerNo}
+            </if>
+            <if test="createTime!=null and createTime!='' ">
+                and DATE_FORMAT(o.create_time,'%Y-%m-%d') = DATE_FORMAT(#{createTime},'%Y-%m-%d')
+            </if>
+            <if test="status!=null and status!=''">
+                and o.status=#{status}
+            </if>
+        </where>
+        order by o.create_time desc
+    </select>
+
+    <select id="findByOrderList" resultType="com.baibei.shiyi.order.feign.base.vo.AdminOrderVo">
+        select
+        id as Id,
+        order_no as orderNo,
+        create_time as createTime,
+        customer_no as customerNo,
+        CASE
+        WHEN status = 'init'
+        THEN
+        '订单初始化'
+        WHEN status = 'wait'
+        THEN
+        '待支付'
+        WHEN status = 'undelivery'
+        THEN
+        '待发货'
+        WHEN status = 'pay_fail'
+        THEN
+        '支付失败'
+        WHEN status = 'deliveryed'
+        THEN
+        '待收货'
+        WHEN status = 'cancel'
+        THEN
+        '已取消'
+        WHEN status ='completed'
+        THEN
+        '已完成'
+        END status
+        FROM tbl_ord_order
+        <where>
+            <include refid="baseFilter"/>
+        </where>
+        order by create_time desc
+    </select>
+
+
+</mapper>

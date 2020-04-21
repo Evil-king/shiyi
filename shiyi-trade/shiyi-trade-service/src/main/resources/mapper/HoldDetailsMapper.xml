@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.trade.dao.HoldDetailsMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.trade.model.HoldDetails">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+    <result column="customer_name" jdbcType="VARCHAR" property="customerName" />
+    <result column="product_trade_no" jdbcType="VARCHAR" property="productTradeNo" />
+    <result column="count" jdbcType="INTEGER" property="count" />
+    <result column="buy_price" jdbcType="DECIMAL" property="buyPrice" />
+    <result column="trade_time" jdbcType="TIMESTAMP" property="tradeTime" />
+    <result column="hold_no" jdbcType="VARCHAR" property="holdNo" />
+    <result column="resource" jdbcType="VARCHAR" property="resource" />
+    <result column="unlock_flag" jdbcType="TINYINT" property="unlockFlag" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+    <update id="updateNewPrice">
+        update tbl_tra_hold_details set product_new_price = #{newProductPrice}
+    </update>
+    <select id="countScannerByCustomerNo" resultType="java.lang.Integer">
+      select count(scanner) from tbl_tra_hold_details where customer_no = #{customerNo} and scanner = '1'
+    </select>
+    <select id="queryByCurrent" resultType="com.baibei.shiyi.trade.common.vo.ListBuyVo">
+    select id,buy_price as price, customer_no as customerNo from tbl_tra_hold_details where scanner = '1'
+  </select>
+    <select id="myHoldList" resultType="com.baibei.shiyi.trade.common.vo.MyHoldVo">
+      select p.product_name as productName,p.product_trade_no as productTradeNo,
+      d.remaind_count as maxSellNum,
+	  d.product_new_price as issuePrice
+    from tbl_tra_product as p
+    left join tbl_tra_hold_details as d on d.product_trade_no = p.product_trade_no
+    where d.scanner = 1 and customer_no = #{customerNo} GROUP BY p.product_name
+  </select>
+
+    <select id="myHoldRemaindCount" resultType="java.lang.Integer">
+       select SUM(remaind_count) from tbl_tra_hold_details where customer_no = #{customerNo} and scanner = 1
+   </select>
+
+    <select id="mypageList" parameterType="com.baibei.shiyi.trade.feign.bean.dto.CustomerHoldPageListDto" resultType="com.baibei.shiyi.trade.feign.bean.vo.CustomerHoldPageListVo">
+        SELECT
+        d.id,
+        d.customer_no customerNo,
+        d.customer_name customerName,
+        DATE_FORMAT(d.create_time,'%Y-%m-%d %H:%i:%s') createTime,
+        d.hold_no holdNo,
+        d.`count` as originalCount,
+        d.product_trade_no productTradeNo,
+        p.product_name productName,
+        d.unlock_flag scanner,
+        d.buy_price buyPrice,
+        CASE
+        when d.unlock_flag ='1' then '已经解锁'
+        when d.unlock_flag ='0' then '未解锁'
+        end as scannerText,
+        d.resource resource
+        FROM
+        tbl_tra_hold_details d left join tbl_tra_product p on d.product_trade_no=p.product_trade_no
+        <where>
+        <if test="customerNo !='' and customerNo!=null ">
+            and d.customer_no=#{customerNo}
+        </if>
+        <if test="startTime!=null and startTime!=''">
+            and d.create_time &gt;= STR_TO_DATE(concat(#{startTime},' 00:00:00'),'%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            and d.create_time &lt;= STR_TO_DATE(concat(#{endTime},' 23:59:59'),'%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="productNo!=null and productNo!=''">
+            and d.product_trade_no like CONCAT('%',#{productNo},'%')
+        </if>
+        <if test="status!=null and status!=''">
+            and d.unlock_flag=#{status}
+        </if>
+        <if test="resource!=null and resource!=''">
+            and d.resource=#{resource}
+        </if>
+        <if test="excludeUser!=null and excludeUser!=''">
+            and NOT EXISTS(select holdDetails.customer_no from tbl_tra_hold_details holdDetails where holdDetails.flag=1 and holdDetails.customer_no=d.customer_no and find_in_set(holdDetails.customer_no,#{excludeUser}))
+        </if>
+        </where>
+        order by d.create_time DESC,d.id
+    </select>
+    <select id="getTotalMarketValue" resultType="com.baibei.shiyi.trade.common.vo.TotalMarketValueVo">
+        select CAST(sum(lastPrice*(remaind_count+frozen_count)) AS DECIMAL(20,2)) totalMarketValue,
+              CAST(sum((lastPrice-buy_price)*(remaind_count+frozen_count)) AS DECIMAL(20,2)) totalProfitAndLoss
+        from tbl_tra_hold_details where customer_no=#{customerNo}
+    </select>
+
+    <select id="getPageList" parameterType="com.baibei.shiyi.account.feign.bean.dto.CustomerNoPageDto" resultType="com.baibei.shiyi.trade.common.vo.HoldDetailListVo">
+SELECT
+    d.id,
+	d.customer_no customerNo,
+	d.product_trade_no productTradeNo,
+	p.product_name productName,
+	d.remaind_count+d.frozen_count holdCount,
+	case
+	when d.unlock_flag = 1
+	then d.remaind_count
+	ELSE
+	0 end AS remaindCount,
+	d.buy_price buyPrice,
+	d.product_new_price productNewPrice,
+	CAST(((d.remaind_count+d.frozen_count)*d.product_new_price) AS DECIMAL(20,2))   marketValue,
+	CAST(((d.remaind_count+d.frozen_count)*(d.product_new_price-d.buy_price)) AS DECIMAL(20,2))   profitAndLoss,
+	p.product_icon productImg
+FROM
+	tbl_tra_hold_details d,tbl_tra_product p where d.product_trade_no=p.product_trade_no and d.customer_no=#{customerNo} and d.original_count !=0
+    order by d.create_time DESC,d.id
+    </select>
+
+    <select id="countHoldMarketValue" resultType="java.math.BigDecimal">
+        SELECT
+        TRUNCATE(SUM((#{lastPrice}*remaind_count),2)
+        FROM
+        tbl_tra_hold_details
+        <where>
+            flag=1
+            and customer_no=#{customerNo}
+            and product_trade_no=#{productTradeNo}
+        </where>
+    </select>
+
+    <select id="calculationCost" resultType="java.math.BigDecimal">
+        select sum(t.count*t.buy_price)/sum(t.count) from tbl_tra_hold_details t
+        where t.customer_no = #{customerNo}
+        and t.product_trade_no =#{productTradeNo}
+        and t.flag = 1
+    </select>
+</mapper>

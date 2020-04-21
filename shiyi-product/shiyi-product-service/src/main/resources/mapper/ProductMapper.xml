@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.product.dao.ProductMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.product.model.Product">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="product_name" jdbcType="VARCHAR" property="productName" />
+    <result column="product_desc" jdbcType="VARCHAR" property="productDesc" />
+    <result column="spu_no" jdbcType="VARCHAR" property="spuNo" />
+    <result column="type_id" jdbcType="BIGINT" property="typeId" />
+    <result column="brand_id" jdbcType="BIGINT" property="brandId" />
+    <result column="brand_title" jdbcType="VARCHAR" property="brandTitle" />
+    <result column="product_img" jdbcType="VARCHAR" property="productImg" />
+    <result column="out_no" jdbcType="VARCHAR" property="outNo" />
+    <result column="parameter" jdbcType="VARCHAR" property="parameter" />
+    <result column="selected_sku" jdbcType="VARCHAR" property="selectedSku" />
+    <result column="common_sell_count" jdbcType="DECIMAL" property="commonSellCount" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+    <select id="selectList" resultType="com.baibei.shiyi.product.feign.bean.vo.AdmProductVo">
+      SELECT
+          p.id,
+          p.spu_no spuNo,
+          p.product_name productName,
+          p.type_id typeId,
+          p.brand_id brandId,
+          p.product_img productImg,
+          p.create_time createTime,
+          b.title brandTitle,
+          ty.title typeTitle
+      FROM
+          tbl_pro_product p,tbl_pro_brand b,tbl_pro_type ty
+          where p.brand_id=b.id and p.type_id=ty.id and p.flag=1
+          <if test="spuNo!=null and spuNo!=''">
+              and p.spu_no=#{spuNo}
+          </if>
+          <if test="productName!=null and productName!=''">
+            and p.product_name like CONCAT('%',#{productName},'%')
+          </if>
+          <if test="typeId!=null and typeId!=''">
+            and p.type_id=#{typeId}
+          </if>
+          <if test="brandId!=null and brandId!=''">
+            and p.brand_id=#{brandId}
+          </if>
+          <if test="startTime!=null">
+            and DATE_FORMAT(p.create_time,'%Y-%m-%d') &gt;= DATE_FORMAT(#{startTime},'%Y-%m-%d')
+          </if>
+          <if test="endTime!=null">
+            and DATE_FORMAT(p.create_time,'%Y-%m-%d') &lt;= DATE_FORMAT(#{endTime},'%Y-%m-%d')
+          </if>
+    </select>
+    <select id="selectEditProductInfo" resultType="com.baibei.shiyi.product.feign.bean.vo.AdmEditProductVo">
+        SELECT
+            p.id productId,
+            p.product_name productName,
+            p.spu_no spuNo,
+            p.type_id typeId,
+            tp.title typeTitle,
+            p.brand_id brandId,
+            bd.title brandTitile,
+            p.product_img mainImg,
+            p.product_desc productDesc,
+            pc.content,
+            p.selected_sku selectedSkuText,
+            p.parameter parameterText,
+            p.common_sell_count commonSellCount
+        FROM
+            tbl_pro_product p
+            left join tbl_pro_type tp on p.type_id = tp.id
+            left join tbl_pro_brand bd on p.brand_id = bd.id
+            left join tbl_pro_product_content pc on p.id=pc.product_id
+        WHERE
+            p.id = #{productId}
+        AND p.flag = 1
+    </select>
+</mapper>

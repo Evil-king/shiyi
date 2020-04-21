@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.trade.dao.DealOrderMapper">
+    <resultMap id="BaseResultMap" type="com.baibei.shiyi.trade.model.DealOrder">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="deal_no" jdbcType="VARCHAR" property="dealNo" />
+        <result column="entrust_no" jdbcType="VARCHAR" property="entrustNo" />
+        <result column="product_trade_no" jdbcType="VARCHAR" property="productTradeNo" />
+        <result column="delister" jdbcType="VARCHAR" property="delister" />
+        <result column="be_delister" jdbcType="VARCHAR" property="beDelister" />
+        <result column="delister_fee" jdbcType="DECIMAL" property="delisterFee" />
+        <result column="be_delister_fee" jdbcType="DECIMAL" property="beDelisterFee" />
+        <result column="direction" jdbcType="VARCHAR" property="direction" />
+        <result column="price" jdbcType="DECIMAL" property="price" />
+        <result column="count" jdbcType="INTEGER" property="count" />
+        <result column="status" jdbcType="VARCHAR" property="status" />
+        <result column="remark" jdbcType="VARCHAR" property="remark" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+        <result column="flag" jdbcType="TINYINT" property="flag" />
+    </resultMap>
+    <select id="selectHistoryDealOrder" resultType="com.baibei.shiyi.trade.common.vo.DealOrderHistoryVo">
+        SELECT
+        id,
+        deal_no as dealNo,
+        product_trade_no as productTradeNo,
+        `type` as type,
+        price as price,
+        fee as fee,
+        `count` as count,
+        create_time as createTime
+        FROM
+        tbl_tra_deal_order
+        <where>
+            <if test="customerNO!=null and customerNO!=''">
+                and (buy_customer_no=#{customerNO} or sell_customer_no=#{customerNO})
+            </if>
+
+            <if test="startTime!=null">
+                and create_time <![CDATA[>=]]> #{startTime}
+            </if>
+
+            <if test="endTime!=null">
+                and create_time <![CDATA[<=]]> #{endTime}
+            </if>
+
+        </where>
+    </select>
+    <select id="dealOrderList" resultType="com.baibei.shiyi.trade.common.vo.MyDealOrderListVo">
+        select
+        d.deal_no AS dealNo,
+        d.price,
+        d.count,
+        d.buy_customer_no AS buyCustomerNo,
+        d.sell_customer_no AS sellCustomerNo,
+        date_format(d.create_time,'%Y-%m-%d %H:%i:%s') AS createTime,
+        d.price * d.count AS totalPrice,
+        p.product_name AS productName,
+        p.product_icon AS productImg,
+        p.spu_no AS spuNo
+        from tbl_tra_deal_order d left join tbl_tra_product p on
+        d.product_trade_no = p.product_trade_no
+        <where>
+            <if test="customerNo != null and customerNo !=''">
+               and  (d.sell_customer_no = #{customerNo}
+            </if>
+            <if test="customerNo != null and customerNo !=''">
+               or  d.buy_customer_no = #{customerNo})
+            </if>
+            <if test="startTime != null and startTime !=''">
+                and date(d.create_time) &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime !=''">
+                and date(d.create_time) &lt;= #{endTime}
+            </if>
+        </where>
+        order by d.create_time desc
+    </select>
+    <select id="myPageList" resultType="com.baibei.shiyi.trade.feign.bean.vo.DealOrderVo" parameterType="com.baibei.shiyi.trade.feign.bean.dto.DealOrderDto">
+    SELECT
+	o.deal_no dealNo,
+	date_format(o.create_time,'%Y-%m-%d %H:%i:%s') AS createTime,
+	o.direction as direction,
+    case
+    when o.direction='buy' then '摘牌买入'
+    when o.direction='sell'then '摘牌卖出'
+    end as directionText,
+	o.delister as delister,
+	o.be_delister as beDelister,
+	o.product_trade_no productTradeNo,
+	p.product_name productName,
+	o.price price,
+	o.count count,
+	CAST(o.price*o.count AS DECIMAL(20,2)) totalPrice,
+	o.delister_fee delisterFee,
+	o.be_delister_fee beDelisterfee,
+    o.entrust_no entrustNo
+	FROM
+	tbl_tra_deal_order o
+	LEFT JOIN tbl_tra_product p on p.product_trade_no=o.product_trade_no
+       <where>
+        1=1
+        <if test="delister !='' and delister!=null ">
+            and o.delister=#{delister}
+        </if>
+        <if test="beDelister !='' and beDelister!=null ">
+            and o.be_delister=#{beDelister}
+        </if>
+        <if test="startTime!=null and startTime!=''">
+            and o.create_time &gt;= STR_TO_DATE(concat(#{startTime},' 00:00:00'),'%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            and o.create_time &lt;= STR_TO_DATE(concat(#{endTime},' 23:59:59'),'%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="direction !='' and direction!=null ">
+            and o.direction=#{direction}
+        </if>
+        <if test="productTradeNo !='' and productTradeNo!=null ">
+            and o.product_trade_no=#{productTradeNo}
+        </if>
+        <if test="entrustNo !='' and entrustNo!=null ">
+            and o.entrust_no=#{entrustNo}
+        </if>
+        <if test="dealNo !='' and dealNo!=null ">
+            and o.deal_no=#{dealNo}
+        </if>
+        <if test="excludeUsers!=null and excludeUsers!=''">
+            and NOT EXISTS(select dealOrder.delister from tbl_tra_deal_order dealOrder where dealOrder.flag=1 and o.delister=dealOrder.delister and find_in_set(dealOrder.delister,#{excludeUsers}))
+        </if>
+       </where>
+        order by o.create_time DESC,o.id
+    </select>
+    <select id="customerHistoryList" resultType="com.baibei.shiyi.trade.common.vo.DealOrderHistoryVo">
+        SELECT
+        product_trade_no as productTradeNo,
+        price as price,
+        `count` as count,
+        create_time as createTime
+        FROM
+        tbl_tra_deal_order
+        where type in ('sell','buy')
+        order by create_time desc
+    </select>
+</mapper>

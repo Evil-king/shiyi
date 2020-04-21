@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.trade.dao.TradeConfigMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.trade.model.TradeConfig">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="trade_frozen_day" jdbcType="INTEGER" property="tradeFrozenDay" />
+    <result column="exchange_frozen_day" jdbcType="INTEGER" property="exchangeFrozenDay" />
+    <result column="closing_price_calculation" jdbcType="INTEGER" property="closingPriceCalculation" />
+    <result column="buy_fee" jdbcType="DECIMAL" property="buyFee" />
+    <result column="sell_fee" jdbcType="DECIMAL" property="sellFee" />
+    <result column="best_price_deal" jdbcType="TINYINT" property="bestPriceDeal" />
+    <result column="market_area_show" jdbcType="TINYINT" property="marketAreaShow" />
+    <result column="quotation_area_show" jdbcType="TINYINT" property="quotationAreaShow" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+</mapper>

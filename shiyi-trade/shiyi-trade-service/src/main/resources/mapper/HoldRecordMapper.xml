@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.trade.dao.HoldRecordMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.trade.model.HoldRecord">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="record_no" jdbcType="VARCHAR" property="recordNo" />
+    <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+    <result column="product_trade_no" jdbcType="VARCHAR" property="productTradeNo" />
+    <result column="count" jdbcType="INTEGER" property="count" />
+    <result column="price" jdbcType="DECIMAL" property="price" />
+    <result column="resource" jdbcType="VARCHAR" property="resource" />
+    <result column="resource_no" jdbcType="VARCHAR" property="resourceNo" />
+    <result column="re_type" jdbcType="VARCHAR" property="reType" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+    <select id="customerHistoryList" resultType="com.baibei.shiyi.trade.common.vo.HoldRecordVo">
+      select
+      h.record_no as recordNo,
+      h.product_trade_no as productTradeNo,
+      DATE_FORMAT(h.create_time,'%Y-%c-%d %H:%i:%S') as createTime,
+      h.resource,
+      h.count,
+      h.price,
+      (h.count*h.price) as totalPrice,
+      p.product_icon as productIcon,
+      p.product_name as productName
+      from tbl_tra_hold_record h,tbl_tra_product p
+      where h.product_trade_no = p.product_trade_no
+      and h.customer_no = #{customerNo}
+      AND p.flag=1
+      <if test="startTime !=null and startTime!=''">
+        and date(h.create_time) &gt;= #{startTime}
+      </if>
+      <if test="endTime!=null and endTime!=''">
+        and date(h.create_time) &lt;= #{endTime}
+      </if>
+      order by h.create_time desc
+    </select>
+</mapper>

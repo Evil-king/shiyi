@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.product.dao.ProductCollectMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.product.model.ProductCollect">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+    <result column="shelf_id" jdbcType="BIGINT" property="shelfId" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+
+   <select id="findByCustomerNo" resultType="com.baibei.shiyi.product.feign.bean.vo.ProductCollectVo">
+    select
+    collect.id as id,
+    collect.shelf_id as shelfId,
+    shelf.product_shelf_name as productName,
+    shelf.source as source,
+    shelf.shelf_type as shelfType,
+    product.product_img as productImg,
+    mps.minShelfPrice as productPrice,
+    collect.create_time as createTime
+    from
+    tbl_pro_product_collect collect left join tbl_pro_product_shelf shelf
+    on collect.shelf_id=shelf.id left join tbl_pro_product product on shelf.product_id=product.id
+    left join
+     (
+     select ps.id shelfId,min(psr.shelf_price) minShelfPrice
+     from tbl_pro_product_shelf ps
+     inner join tbl_pro_product_shelf_ref psr on ps.id=psr.shelf_id  and psr.flag=1 and ps.flag=1
+     group by ps.id)mps on shelf.id=mps.shelfId
+    <where>
+      customer_no=#{customerNo}
+      and collect.flag=1
+    </where>
+    order  by collect.create_time desc
+    </select>
+</mapper>

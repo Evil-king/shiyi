@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.trade.dao.TransferDetailsMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.trade.model.TransferDetails">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="transfer_log_id" jdbcType="BIGINT" property="transferLogId" />
+    <result column="serial_number" jdbcType="VARCHAR" property="serialNumber" />
+    <result column="in_customer_no" jdbcType="VARCHAR" property="inCustomerNo" />
+    <result column="out_customer_no" jdbcType="VARCHAR" property="outCustomerNo" />
+    <result column="product_trade_no" jdbcType="VARCHAR" property="productTradeNo" />
+    <result column="transfer_num" jdbcType="INTEGER" property="transferNum" />
+    <result column="price" jdbcType="DECIMAL" property="price" />
+    <result column="buy_fee" jdbcType="DECIMAL" property="buyFee" />
+    <result column="sell_fee" jdbcType="DECIMAL" property="sellFee" />
+    <result column="cost_price" jdbcType="DECIMAL" property="costPrice" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+  <select id="listPage" resultType="com.baibei.shiyi.trade.feign.bean.vo.TransferPageListVo">
+    select
+    serial_number as serialNumber,
+    in_customer_no as inCustomerNo,
+    out_customer_no as outCustomerNo,
+    product_trade_no as productTradeNo,
+    transfer_num as transferNum,
+    price,
+    price * transfer_num as totalPrice,
+    buy_fee as buyFee,
+    sell_fee as sellFee,
+    cost_price as costPrice,
+    case
+    when status = 'success'
+    then '成功'
+    when status = 'fail'
+    then '失败'
+    when status = 'wait'
+    then '待执行'
+    end status,
+    remark,
+    DATE_FORMAT(create_time,'%Y-%c-%d %H:%i:%S') as createTime
+    from tbl_tra_transaction_transfer_details
+    where flag =1
+    <if test="transferLogId != null and transferLogId !=''">
+        and transfer_log_id = #{transferLogId}
+    </if>
+    <if test="serialNumber != null and serialNumber !=''">
+      and serial_number = #{serialNumber}
+    </if>
+    <if test="inCustomerNo != null and inCustomerNo !=''">
+      and in_customer_no = #{inCustomerNo}
+    </if>
+    <if test="outCustomerNo != null and outCustomerNo!=''">
+      and out_customer_no =#{outCustomerNo}
+    </if>
+    <if test="status !=null and status !=''">
+      and status = #{status}
+    </if>
+    order by create_time desc
+  </select>
+</mapper>

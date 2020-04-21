@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.trade.dao.ProductMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.trade.model.Product">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="product_name" jdbcType="VARCHAR" property="productName" />
+    <result column="product_icon" jdbcType="VARCHAR" property="productIcon" />
+    <result column="product_trade_no" jdbcType="VARCHAR" property="productTradeNo" />
+    <result column="issue_price" jdbcType="DECIMAL" property="issuePrice" />
+    <result column="exchange_price" jdbcType="DECIMAL" property="exchangePrice" />
+    <result column="min_trade" jdbcType="INTEGER" property="minTrade" />
+    <result column="max_trade" jdbcType="INTEGER" property="maxTrade" />
+    <result column="highest_quoted_price" jdbcType="DECIMAL" property="highestQuotedPrice" />
+    <result column="lowest_quoted_price" jdbcType="DECIMAL" property="lowestQuotedPrice" />
+    <result column="trade_status" jdbcType="VARCHAR" property="tradeStatus" />
+    <result column="market_time" jdbcType="TIMESTAMP" property="marketTime" />
+    <result column="unit" jdbcType="VARCHAR" property="unit" />
+    <result column="creator" jdbcType="VARCHAR" property="creator" />
+    <result column="modifier" jdbcType="VARCHAR" property="modifier" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+  <select id="modifyStatus" resultMap="BaseResultMap">
+    select * from  tbl_tra_product where trade_status = 'wait' and flag = 1
+  </select>
+  <select id="listPage" resultType="com.baibei.shiyi.trade.feign.bean.vo.TradeProductListVo">
+      select
+      id,
+      product_trade_no as productTradeNo,
+      product_name as productName,
+      issue_price as issuePrice,
+      exchange_price as exchangePrice,
+      DATE_FORMAT(market_time,'%Y-%c-%d %H:%i:%S') as marketTime,
+      trade_status as tradeStatus,
+      creator,
+      modifier,
+      DATE_FORMAT(modify_time,'%Y-%c-%d %H:%i:%S') as modifyTime,
+      DATE_FORMAT(create_time,'%Y-%c-%d %H:%i:%S') as createTime
+      from tbl_tra_product
+      where flag = 1
+        <if test="productName != null and productName!=''">
+          and product_name like "%"#{productName}"%"
+        </if>
+        <if test="productTradeNo != null and productTradeNo!=''">
+          and product_trade_no = #{productTradeNo}
+        </if>
+        <if test="tradeStatus != null and tradeStatus!=''">
+          and trade_status = #{tradeStatus}
+        </if>
+      order by create_time desc
+    </select>
+
+    <select id="findEffective" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select * from tbl_tra_product t where 1=1
+        and t.product_trade_no = #{productTradeNo}
+        and t.flag = 1
+    </select>
+    <select id="findEffectiveList" resultMap="BaseResultMap">
+        select * from tbl_tra_product t where t.flag = 1 and trade_status = 'trading'
+    </select>
+</mapper>

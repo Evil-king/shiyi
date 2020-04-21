@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.product.dao.CategoryMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.product.model.Category">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="parent_id" jdbcType="BIGINT" property="parentId" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="seq" jdbcType="INTEGER" property="seq" />
+    <result column="end" jdbcType="TINYINT" property="end" />
+    <result column="show_status" jdbcType="VARCHAR" property="showStatus" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+    <select id="selectFirstCategorys" resultType="com.baibei.shiyi.product.feign.bean.vo.CategoryVo">
+      select
+      t.id,
+      t.parent_id,
+      t.title,
+      t.seq,
+      t.end,
+      t.show_status showStatus,
+      t.img
+      from tbl_pro_category t
+      where t.flag=1 and t.show_status="show" and t.parent_id=0
+      order by t.seq asc
+    </select>
+  <select id="selectFirstIndexCategorys" resultType="com.baibei.shiyi.product.feign.bean.vo.CategoryVo">
+     select
+      t.id,
+      t.parent_id,
+      <if test="cutCount!=null and cutCount!=''">
+        left(t.title,${cutCount}) title,
+      </if>
+      <if test="cutCount==null or cutCount==''">
+        t.title,
+      </if>
+      t.seq,
+      t.end,
+      t.show_status showStatus,
+      t.img
+      from tbl_pro_category t
+      where
+      (t.id in(select s.category_id from tbl_pro_product_shelf s group by s.category_id) or t.end=0) and
+      t.flag=1 and t.show_status="show" and t.parent_id=0
+      order by t.seq asc
+  </select>
+  <select id="selectIndexCategorysByPid" resultType="com.baibei.shiyi.product.feign.bean.vo.CategoryVo">
+    select t.* from
+    (select
+    t.id,
+    t.parent_id,
+    <if test="cutCount!=null and cutCount!=''">
+      left(t.title,${cutCount}) title,
+    </if>
+    <if test="cutCount==null or cutCount==''">
+      t.title,
+    </if>
+    t.seq,
+    t.end,
+    t.show_status showStatus,
+    t.img
+    from tbl_pro_category t
+    where
+    (t.id in(select sf.category_id from tbl_pro_shelf_categroy_ref sf group by sf.category_id) or t.end=0) and
+    t.flag=1 and t.show_status="show" and t.parent_id=#{parentId}
+    order by t.seq is null,t.seq asc
+    <if test="maxCount!=null and maxCount!=''">
+      limit ${maxCount}
+    </if>
+    )t
+  </select>
+  <select id="selectIndexCategoryProducts" resultType="com.baibei.shiyi.product.feign.bean.vo.CategoryProductVo">
+    SELECT
+        s.sellCount,
+        <include refid="com.baibei.shiyi.product.dao.CommonMapper.indexShelfColumn"/>
+    FROM
+        tbl_pro_shelf_categroy_ref sf
+    INNER JOIN tbl_pro_product_shelf ps ON sf.shelf_id = ps.id
+    INNER JOIN <include refid="com.baibei.shiyi.product.dao.CommonMapper.minShelfPriceSelect"/>
+    INNER JOIN tbl_pro_product p ON ps.product_id = p.id
+      INNER JOIN (
+      SELECT
+      stock.product_id,
+      sum(stock.sell_count) sellCount
+      FROM
+      tbl_pro_product_stock stock
+      GROUP BY
+      stock.product_id
+      ) s ON p.id = s.product_id
+    WHERE sf.category_id=#{id}
+  </select>
+    <select id="selectAdmCategoryProductList"
+            resultType="com.baibei.shiyi.product.feign.bean.vo.BaseShelfVo">
+        SELECT
+        ps.id shelfId,
+        ps.shelf_no shelfNo,
+        ps.product_shelf_name shelfName,
+        ps.shelf_time shelfTime,
+        ps.source,
+        ps.status,
+        case ps.status
+        when 'shelf' then '已上架'
+        when 'unshelf' then '未上架'
+        else '其他' end as shelfStatusText,
+        p.id productId,
+        p.spu_no spuNo,
+        p.product_img productImg,
+        b.title brandTitle
+    FROM
+        tbl_pro_shelf_categroy_ref sf
+    INNER JOIN tbl_pro_product_shelf ps ON sf.shelf_id = ps.id
+    INNER JOIN tbl_pro_product p ON ps.product_id = p.id
+    left join tbl_pro_brand b on p.brand_id=b.id
+    WHERE sf.category_id=#{categoryId}
+    ORDER BY ps.create_time desc
+    </select>
+    <select id="selectProductListNotInCategory"
+            resultType="com.baibei.shiyi.product.feign.bean.vo.BaseShelfVo">
+        SELECT
+        ps.id shelfId,
+        ps.shelf_no shelfNo,
+        ps.product_shelf_name shelfName,
+        ps.shelf_time shelfTime,
+        ps.source,
+        ps.status shelfStatus,
+        case ps.status
+        when 'shelf' then '已上架'
+        when 'unshelf' then '未上架'
+        else '其他' end as shelfStatusText,
+        p.id productId,
+        p.spu_no spuNo,
+        p.product_img productImg,
+        b.title brandTitle,
+        pt.title typeTitle
+    FROM
+		tbl_pro_product_shelf ps
+    INNER JOIN tbl_pro_product p ON ps.product_id = p.id
+    LEFT JOIN tbl_pro_brand b ON p.brand_id=b.id
+    LEFT JOIN tbl_pro_type pt ON p.type_id=pt.id
+    <where>
+        <if test="shelfName!=null and shelfName!=''">
+            ps.product_shelf_name like CONCAT('%',#{shelfName},'%')
+        </if>
+        <if test="spuNo!=null and spuNo!=''">
+            and p.spu_no = #{spuNo}
+        </if>
+        <if test="typeId!=null and typeId!=''">
+            and p.type_id = #{typeId}
+        </if>
+        and ps.flag=1
+        and
+        NOT EXISTS
+        (select shelf_id from tbl_pro_shelf_categroy_ref rf where rf.category_id=#{categoryId} and rf.flag=1 and rf.shelf_id=ps.id)
+    </where>
+    ORDER BY ps.create_time desc
+    </select>
+
+</mapper>

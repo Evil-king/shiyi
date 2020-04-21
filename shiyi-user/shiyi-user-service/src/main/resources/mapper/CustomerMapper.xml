@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.user.dao.CustomerMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.user.model.Customer">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="mobile" jdbcType="VARCHAR" property="mobile" />
+    <result column="org_code" jdbcType="BIGINT" property="orgCode" />
+    <result column="city_agent_code" jdbcType="BIGINT" property="cityAgentCode" />
+    <result column="mobile_location" jdbcType="VARCHAR" property="mobileLocation" />
+    <result column="recommender_id" jdbcType="VARCHAR" property="recommenderId" />
+    <result column="org_id" jdbcType="BIGINT" property="orgId" />
+    <result column="customer_type" jdbcType="TINYINT" property="customerType" />
+    <result column="customer_status" jdbcType="VARCHAR" property="customerStatus" />
+    <result column="salt" jdbcType="VARCHAR" property="salt" />
+    <result column="qrcode" jdbcType="VARCHAR" property="qrcode" />
+      <result column="bank_client_no" jdbcType="VARCHAR" property="bankClientNo" />
+      <result column="fund_account_clear" jdbcType="VARCHAR" property="fundAccountClear" />
+      <result column="mem_code_clear" jdbcType="VARCHAR" property="memCodeClear" />
+      <result column="register_source" jdbcType="VARCHAR" property="registerSource" />
+    <result column="signing" jdbcType="CHAR" property="signing"/>
+    <result column="is_sign" jdbcType="CHAR" property="isSign"/>
+      <result column="is_legal_person" jdbcType="CHAR" property="isLegalPerson"/>
+      <result column="realname_verification" jdbcType="CHAR" property="realnameVerification"/>
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+      <result column="signing_time" jdbcType="TIMESTAMP" property="signingTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+  <select id="pageList" parameterType="com.baibei.shiyi.user.common.dto.CustomerPageListDto" resultType="com.baibei.shiyi.user.common.vo.CustomerPageListVo">
+    SELECT
+	id as id,
+	mobile as mobile,
+	customer_no as customerNo,
+	mobile_location as mobileLocation,
+	recommender_id as recommenderId,
+	create_time as createTime,
+	customer_status as status
+FROM
+	tbl_customer c
+    where 1=1
+    <if test="customerNo!=null and customerNo!=''">
+      and c.customer_no = #{customerNo}
+    </if>
+    <if test="mobile!=null and mobile!=''">
+      and c.mobile = #{mobile}
+    </if>
+    <if test="status!=null and status!=''">
+      and c.customer_status like CONCAT('%',#{status},'%')
+    </if>
+    <if test="startTime!=null and startTime!=''">
+      and date(c.create_time) &gt;= #{startTime}
+    </if>
+    <if test="recommenderId!=null and recommenderId!=''">
+      and c.recommender_id = #{recommenderId}
+    </if>
+    <if test="endTime!=null and endTime!=''">
+      and date(c.create_time) &lt;= #{endTime}
+    </if>
+    order by c.create_time desc
+  </select>
+    <select id="getCustomerBalanceList" resultType="com.baibei.shiyi.user.feign.bean.vo.AdminCustomerBalanceVo" parameterType="com.baibei.shiyi.user.feign.bean.dto.AdminCustomerAccountDto">
+        select c.customer_no customerNo,c.mobile mobile ,c.recommender_id recommenderId,c2.recommender_id indirectRecommendId,c.org_id orgId from tbl_customer c LEFT JOIN tbl_customer c2 on c.recommender_id=c2.customer_no
+        where 1=1
+        <if test="customerNo!=null and customerNo!=''">
+            and c.customer_no = #{customerNo}
+        </if>
+        <if test="mobile!=null and mobile!=''">
+            and c.mobile = #{mobile}
+        </if>
+        <if test="recommenderId!=null and recommenderId!=''">
+            and c.recommender_id = #{recommenderId}
+        </if>
+        order by c.create_time ,c.id desc
+    </select>
+    <select id="getAllCustomerList" parameterType="com.baibei.shiyi.user.feign.bean.dto.CustomerListDto" resultType="com.baibei.shiyi.user.feign.bean.vo.CustomerListVo">
+        SELECT
+            c.id id,
+            c.mobile mobile,
+            c.customer_no customerNo,
+            c.recommender_id recommenderId,
+            d.realname realname,
+            d.idcard idcard,
+            d.bank_name signingBank,
+            d.bank_card signingBankCardNo,
+            c1.recommender_id indirectRecommendId,
+            DATE_FORMAT(c.create_time,'%Y-%m-%d %H:%i:%s') createTime,
+            c.customer_status customerStatus,
+            c.fund_account_clear fundAccountClear,
+            c.bank_client_no bankClientNo,
+            c.org_id orgId,
+            c.signing_time signingTime,
+            d.branch_name branchName
+        FROM
+            tbl_customer c
+        LEFT JOIN tbl_customer_detail d ON d.customer_no = c.customer_no
+        LEFT JOIN tbl_customer c1 ON c.recommender_id = c1.customer_no
+        where 1=1
+        <if test="startTime!=null and startTime!=''">
+            and c.create_time &gt;= STR_TO_DATE(concat(#{startTime},' 00:00:00'),'%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            and c.create_time &lt;= STR_TO_DATE(concat(#{endTime},' 23:59:59'),'%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="customerNo!=null and customerNo!=''">
+            and c.customer_no = #{customerNo}
+        </if>
+        <if test="mobile!=null and mobile!=''">
+            and c.mobile = #{mobile}
+        </if>
+        <if test="customerStatus!=null and customerStatus!=''">
+            and c.customer_status like CONCAT('%',#{customerStatus},'%')
+        </if>
+        <if test="recommenderId!=null and recommenderId!=''">
+            and c.recommender_id = #{recommenderId}
+        </if>
+        <if test="realname!=null and realname!=''">
+            and d.realname = #{realname}
+        </if>
+        order by c.create_time desc,c.id
+    </select>
+</mapper>

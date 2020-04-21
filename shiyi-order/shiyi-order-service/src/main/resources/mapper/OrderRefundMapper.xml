@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.order.dao.OrderRefundMapper">
+    <resultMap id="BaseResultMap" type="com.baibei.shiyi.order.model.OrderRefund">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="order_item_id" jdbcType="BIGINT" property="orderItemId"/>
+        <result column="review_status" jdbcType="VARCHAR" property="reviewStatus"/>
+        <result column="review_time" jdbcType="TIMESTAMP" property="reviewTime"/>
+        <result column="refund_amount" jdbcType="DECIMAL" property="refundAmount"/>
+        <result column="reason" jdbcType="VARCHAR" property="reason"/>
+        <result column="refund_status" jdbcType="VARCHAR" property="refundStatus"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="flag" jdbcType="TINYINT" property="flag"/>
+    </resultMap>
+    <select id="findByOrderId" resultType="com.baibei.shiyi.order.feign.base.vo.AdminOrderRefundVo">
+    select
+    refund.id as refundId,
+    item.order_item_no as orderItemNo,
+    item.product_name as productName,
+    item.amount as amount,
+    item.quantity as quantity,
+    item.actual_amount as actualAmount,
+    refund.reason as reason,
+    refund.create_time as createTime,
+    refund.review_time as reviewTime,
+    refund.refund_status as refundStatus,
+    refund.review_status as reviewStatus
+    from  tbl_ord_order_item item inner join tbl_ord_order_refund refund
+    on refund.order_item_id=item.id
+    <where>
+        item.order_id=#{orderId}
+    </where>
+  </select>
+
+</mapper>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.product.dao.GroupMapper">
+    <resultMap id="BaseResultMap" type="com.baibei.shiyi.product.model.Group">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="group_no" jdbcType="VARCHAR" property="groupNo"/>
+        <result column="title" jdbcType="VARCHAR" property="title"/>
+        <result column="group_type" jdbcType="VARCHAR" property="groupType"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="flag" jdbcType="TINYINT" property="flag"/>
+    </resultMap>
+    <select id="myList" resultType="com.baibei.shiyi.product.feign.bean.vo.GroupVo">
+        SELECT
+        g.id as id,
+        g.title as title,
+        g.group_type as groupType,
+        case
+        when gr.productCount is null then 0
+        else gr.productCount end as productCount,
+        g.create_time as createTime,
+        g.modify_time as modifyTime
+        FROM
+        tbl_pro_group g
+        left JOIN (
+        SELECT
+        gr.group_id,
+        count(1) productCount
+        FROM
+        tbl_pro_product_group_ref gr
+        GROUP BY
+        gr.group_id
+        ) gr ON g.id = gr.group_id
+        where g.flag=1
+        <if test="title!=null and title!=''">
+            and g.title like CONCAT('%',#{title},'%')
+        </if>
+        <if test="startTime!=null">
+            <![CDATA[and g.create_time>=#{startTime}]]>
+        </if>
+
+        <if test="endTime!=null">
+            <![CDATA[and g.create_time<=#{endTime}]]>
+        </if>
+    </select>
+
+
+</mapper>

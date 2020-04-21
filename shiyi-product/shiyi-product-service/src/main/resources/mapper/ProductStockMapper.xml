@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.product.dao.ProductStockMapper">
+    <resultMap id="BaseResultMap" type="com.baibei.shiyi.product.model.ProductStock">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="sku_id" jdbcType="BIGINT" property="skuId"/>
+        <result column="product_id" jdbcType="BIGINT" property="productId"/>
+        <result column="spu_no" jdbcType="DECIMAL" property="spuNo"/>
+        <result column="stock" jdbcType="DECIMAL" property="stock"/>
+        <result column="unit" jdbcType="VARCHAR" property="unit"/>
+        <result column="sell_count" jdbcType="DECIMAL" property="sellCount"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="flag" jdbcType="TINYINT" property="flag"/>
+    </resultMap>
+    <update id="detuchStock">
+      UPDATE tbl_pro_product_stock set stock = stock-#{detuchNum},sell_count=sell_count+#{detuchNum},modify_time=now() where sku_id=#{skuId} and product_id=#{productId} and stock-#{detuchNum}>=0
+    </update>
+    <update id="softDelete">
+        UPDATE tbl_pro_product_stock set flag=0,modify_time=now() where product_id=#{productId}
+    </update>
+    <update id="changeStock">
+        UPDATE tbl_pro_product_stock set stock = stock+#{changeCount},sell_count=sell_count+#{sellCount},
+        modify_time=now() where sku_id=#{skuId} and product_id=#{productId} and stock+#{changeCount}>=0
+    </update>
+    <update id="changeSellCount">
+        UPDATE tbl_pro_product_stock set sell_count=sell_count+#{changeAmount},modify_time=now() where sku_id=#{skuId} and product_id=#{productId}
+    </update>
+
+    <!--按销量进行排序-->
+    <select id="countHotProduct" resultType="java.lang.Long">
+    select
+    count(1)
+    from
+    tbl_pro_product_stock stock
+    where
+    stock.sell_count>0
+    group by sell_count desc
+  </select>
+</mapper>

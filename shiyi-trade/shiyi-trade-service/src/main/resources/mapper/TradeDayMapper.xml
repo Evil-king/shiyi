@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.trade.dao.TradeDayMapper">
+    <resultMap id="BaseResultMap" type="com.baibei.shiyi.trade.model.TradeDay">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="trade_day" jdbcType="TIMESTAMP" property="tradeDay"/>
+        <result column="start_time" jdbcType="VARCHAR" property="startTime"/>
+        <result column="end_time" jdbcType="VARCHAR" property="endTime"/>
+        <result column="period" jdbcType="VARCHAR" property="period"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="flag" jdbcType="TINYINT" property="flag"/>
+    </resultMap>
+
+    <select id="listTradeDay" parameterType="java.util.Map" resultType="java.util.Date">
+        select distinct trade_day from tbl_tra_trade_day t where 1=1
+        <if test="forward == 1">
+            and t.trade_day > #{date}
+        </if>
+        <if test="forward == 0">
+            <![CDATA[and t.trade_day < #{date}]]>
+        </if>
+        order by t.trade_day
+        <if test="forward == 1">
+            asc
+        </if>
+        <if test="forward == 0">
+            desc
+        </if>
+        limit 0,#{limit}
+    </select>
+
+    <select id="selectByDate" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select * from tbl_tra_trade_day t where DATE_FORMAT(t.trade_day,'%Y-%m-%d') = #{date} and t.flag = 1
+    </select>
+</mapper>

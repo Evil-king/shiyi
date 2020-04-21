@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.trade.dao.RiskTradeMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.trade.model.RiskTrade">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="open_flag" jdbcType="TINYINT" property="openFlag" />
+    <result column="creator" jdbcType="VARCHAR" property="creator" />
+    <result column="effect_time" jdbcType="TIMESTAMP" property="effectTime" />
+    <result column="failure_time" jdbcType="TIMESTAMP" property="failureTime" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+</mapper>

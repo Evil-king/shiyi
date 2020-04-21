@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.user.dao.CustomerDetailMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.user.model.CustomerDetail">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+    <result column="sex" jdbcType="CHAR" property="sex" />
+    <result column="age" jdbcType="BIT" property="age" />
+    <result column="area" jdbcType="VARCHAR" property="area" />
+    <result column="city" jdbcType="VARCHAR" property="city" />
+    <result column="province" jdbcType="VARCHAR" property="province" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="bank_name" jdbcType="VARCHAR" property="bankName" />
+    <result column="branch_name" jdbcType="VARCHAR" property="branchName" />
+    <result column="realname" jdbcType="VARCHAR" property="realname" />
+    <result column="address" jdbcType="VARCHAR" property="address" />
+    <result column="idcard" jdbcType="VARCHAR" property="idcard" />
+    <result column="bank_card" jdbcType="VARCHAR" property="bankCard" />
+    <result column="bank_mobile" jdbcType="VARCHAR" property="bankMobile" />
+    <result column="user_picture" jdbcType="VARCHAR" property="userPicture" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+</mapper>

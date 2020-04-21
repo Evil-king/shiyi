@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.product.dao.ProductShelfMapper">
+    <resultMap id="BaseResultMap" type="com.baibei.shiyi.product.model.ProductShelf">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="shelf_no" jdbcType="VARCHAR" property="shelfNo"/>
+        <result column="spu_no" jdbcType="VARCHAR" property="spuNo"/>
+        <result column="product_id" jdbcType="BIGINT" property="productId"/>
+        <result column="product_shelf_name" jdbcType="VARCHAR" property="productShelfName"/>
+        <result column="line_price" jdbcType="DECIMAL" property="linePrice"/>
+        <result column="module" jdbcType="VARCHAR" property="module"/>
+        <result column="plan" jdbcType="DECIMAL" property="plan"/>
+        <result column="unit" jdbcType="VARCHAR" property="unit"/>
+        <result column="maxdetuch" jdbcType="DECIMAL" property="maxdetuch"/>
+        <result column="org_id" jdbcType="BIGINT" property="orgId"/>
+        <result column="source" jdbcType="VARCHAR" property="source"/>
+        <result column="separet_benefit" jdbcType="VARCHAR" property="separetBenefit"/>
+        <result column="freight_type" jdbcType="VARCHAR" property="freightType"/>
+        <result column="integral_type" jdbcType="VARCHAR" property="integralType"/>
+        <result column="shelf_type" jdbcType="VARCHAR" property="shelfType"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="shelf_time" jdbcType="TIMESTAMP" property="shelfTime"></result>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="flag" jdbcType="TINYINT" property="flag"/>
+    </resultMap>
+    <sql id="baseColumn">
+        id,shelf_no,spu_no,product_id,product_shelf_name,line_price,module,plan,unit,maxdetuch,org_id,source
+        separet_benefit,freight_type,integral_type,status,create_time,modify_time,flag
+    </sql>
+    <update id="updateById">
+        UPDATE tbl_pro_product_shelf
+        <set>
+            line_price = #{linePrice},
+            <if test="productShelfName!=null and productShelfName!=''">
+                product_shelf_name = #{productShelfName},
+            </if>
+            <if test="freightType!=null and freightType!=''">
+                freight_type = #{freightType},
+            </if>
+            <if test="shelfType!=null and shelfType!=''">
+                shelf_type = #{shelfType},
+            </if>
+            <if test="modifyTime!=null">
+                modify_time = #{modifyTime},
+            </if>
+            <if test="flag!=null and flag!=''">
+                flag = #{flag},
+            </if>
+            <if test="shelfTime!=null">
+                shelf_time = #{shelfTime},
+            </if>
+        </set>
+        WHERE  id = #{id}
+    </update>
+
+    <select id="selectBaseShelfProductInfo" parameterType="com.baibei.shiyi.product.feign.bean.dto.ShelfRefDto"
+            resultType="com.baibei.shiyi.product.feign.bean.vo.BaseShelfVo">
+        select
+        ps.id shelfId,
+        ps.shelf_no shelfNo,
+        ps.product_shelf_name shelfName,
+        psr.shelf_price shelfPrice,
+        ps.line_price linePrice,
+        ps.module,
+        ps.plan,
+        ps.maxdetuch,
+        ps.unit,
+        ps.integral_type integralType,
+        ps.status,
+        ps.shelf_time shelfTime,
+        ps.shelf_type shelfType,
+        ps.freight_type freightType,
+        pu.id skuId,
+        pu.sku_no skuNo,
+        pu.sku_property skuProperty,
+        p.spu_no spuNo,
+        p.id productId,
+        p.product_name productName,
+        p.product_img productImg,
+        p.product_desc productDesc,
+        p.brand_id brandId,
+        p.brand_title brandTitle,
+        p.parameter,
+        p.type_id typeId,
+        p.out_no outNo,
+        pk.stock,
+        pk.unit stockUnit,
+        pk.sell_count sellCount
+        from tbl_pro_product_shelf ps
+        inner join tbl_pro_product_shelf_ref psr on ps.id=psr.shelf_id
+        <if test="skuId!=null and skuId!=''">and psr.sku_id=#{skuId}</if>
+        and psr.flag=1
+        inner join tbl_pro_product_sku pu on psr.sku_id=pu.id
+        inner join tbl_pro_product p on ps.product_id = p.id
+        inner join tbl_pro_product_stock pk ON p.id = pk.product_id
+        AND psr.sku_id = pk.sku_id
+        AND pk.flag = 1
+        where ps.id=#{shelfId} and ps.flag=1
+    </select>
+
+    <select id="findGroupProduct" resultType="com.baibei.shiyi.product.feign.bean.vo.GroupProductVo">
+        select
+        shelf.id as shelfId,
+        shelf.product_shelf_name as shelfName,
+        shelf.spu_no as spuNo,
+        shelf.source as source,
+        shelf.shelf_no as shelfNo,
+        shelf.status as status
+        from
+        tbl_pro_product_shelf shelf left join tbl_pro_product_group_ref productGroup on shelf.id= productGroup.shelf_id
+        <where>
+            productGroup.flag=1
+            <if test="groupId!=null">
+                and productGroup.group_id=#{groupId}
+            </if>
+        </where>
+        order by shelf.create_time desc,shelf.id
+    </select>
+
+
+    <select id="findNoExistProductGroup" resultType="com.baibei.shiyi.product.feign.bean.vo.GroupProductVo">
+        select
+        shelf.id as shelfId,
+        shelf.product_shelf_name as shelfName,
+        shelf.source as source,
+        shelf.shelf_no as shelfNo,
+        shelf.status as status,
+        tp.title as typeTitle
+        from
+        tbl_pro_product_shelf shelf
+        inner join tbl_pro_product product on shelf.product_id=product.id
+        inner join tbl_pro_type tp on product.type_id=tp.id
+        <where>
+           shelf.flag=1
+            <if test="groupId!=null">
+               and not exists (
+                select productGroup.shelf_id from tbl_pro_product_group_ref productGroup where
+                productGroup.group_id=#{groupId} and productGroup.shelf_id=shelf.id
+                )
+            </if>
+            <if test="shelfName!=null and shelfName!=''">
+                and shelf.product_shelf_name like CONCAT('%',#{shelfName},'%')
+            </if>
+            <if test="spuNo!=null and spuNo!=''">
+                and shelf.spu_no=#{spuNo}
+            </if>
+            <if test="typeId!=null and typeId!=''">
+                and product.type_id=#{typeId}
+            </if>
+        </where>
+        order by shelf.create_time desc,shelf.id
+    </select>
+    <select id="selectBaseIndexProductInfo"
+            resultType="com.baibei.shiyi.product.feign.bean.vo.BaseIndexProductVo">
+        SELECT
+        s.sellCount,
+        <include refid="com.baibei.shiyi.product.dao.CommonMapper.indexShelfColumn"/>
+        FROM
+        tbl_pro_product_shelf ps
+        INNER JOIN <include refid="com.baibei.shiyi.product.dao.CommonMapper.minShelfPriceSelect"/>
+        INNER JOIN tbl_pro_product p ON ps.product_id = p.id
+        INNER JOIN (
+        SELECT
+        stock.product_id,
+        sum(stock.sell_count) sellCount
+        FROM
+        tbl_pro_product_stock stock
+        GROUP BY
+        stock.product_id
+        ) s ON p.id = s.product_id
+    </select>
+
+
+    <select id="countLatestProduct" resultType="java.lang.Long">
+      select
+      count(1)
+      from
+      tbl_pro_product_shelf shelf
+      order by shelf_time desc
+    </select>
+
+
+    <select id="findLastByShelfTime" resultType="com.baibei.shiyi.product.feign.bean.vo.GroupProductVo">
+        select
+        shelf.id as shelfId,
+        shelf.product_shelf_name as shelfName,
+        shelf.spu_no as spuNo,
+        shelf.source as source,
+        shelf.shelf_no as shelfNo,
+        shelf.status as status
+        from
+        tbl_pro_product_shelf shelf
+        inner join tbl_pro_product product on shelf.product_id=product.id and product.flag=1
+        where
+        shelf.status='shelf'
+        and shelf.flag=1
+        order by shelf.shelf_time desc
+    </select>
+
+    <select id="findLastSellCountByProduct" resultType="com.baibei.shiyi.product.feign.bean.vo.GroupProductVo">
+        select
+        shelf.id as shelfId,
+        shelf.product_shelf_name as shelfName,
+        shelf.spu_no as spuNo,
+        shelf.source as source,
+        shelf.shelf_no as shelfNo,
+        shelf.status as status
+        from
+        tbl_pro_product_shelf shelf
+        inner join tbl_pro_product product on shelf.product_id=product.id and product.flag=1
+        left join
+        (SELECT
+         spu_no,
+		 SUM(sell_count) AS sellCount
+		FROM
+		tbl_pro_product_stock
+	    where
+	    flag=1
+	    GROUP BY spu_no) stock on
+        shelf.spu_no=stock.spu_no
+        where
+        shelf.status='shelf'and shelf.flag=1
+        order by stock.sellCount desc
+    </select>
+    <select id="selectAdmShelfSkuInfoList"
+            resultType="com.baibei.shiyi.product.feign.bean.vo.AdmProductShelfSkuVo">
+      select
+        sf.shelf_id shelfId,
+        sf.sku_id skuId,
+        sf.shelf_price shelfPrice,
+        ps.sku_no skuNo,
+        ps.sku_property skuProperty,
+        st.stock
+        from tbl_pro_product_shelf_ref sf
+        inner join tbl_pro_product_sku ps on sf.sku_id=ps.id
+        inner join tbl_pro_product_stock st on sf.sku_id=st.sku_id and ps.product_id=st.product_id and st.flag=1
+      where shelf_id=#{shelfId}
+    </select>
+    <select id="selectProductShelfList" resultType="com.baibei.shiyi.product.feign.bean.vo.BaseShelfVo">
+        SELECT
+        ps.id shelfId,
+        ps.shelf_no shelfNo,
+        ps.product_shelf_name shelfName,
+        ps.source,
+        ps.line_price linePrice,
+        ps.product_id productId,
+        ps.create_time createTime,
+        ps.modify_time modifyTime,
+        p.spu_no spuNo,
+        p.product_img productImg,
+        p.type_id typeId,
+        tp.title typeTitle,
+        ps.plan,
+        ps.separet_benefit separetBenefit,
+        stk.stock,
+        CASE
+        WHEN stk.sellCount IS NULL THEN
+        0
+        ELSE
+        stk.sellCount
+        END AS sellCount,
+        ps.`status`,
+        CASE ps.`status`
+        WHEN 'shelf' THEN
+        '已上架'
+        WHEN 'unshelf' THEN
+        '未上架'
+        ELSE
+        '其他'
+        END AS shelfStatusText,
+        DATE_FORMAT(ps.shelf_time,'%Y-%m-%d %H:%i:%s') shelfTime
+        FROM
+        tbl_pro_product_shelf ps
+        INNER JOIN tbl_pro_product p ON ps.product_id = p.id
+        AND p.flag = 1
+        LEFT JOIN tbl_pro_type tp ON p.type_id = tp.id
+        LEFT JOIN (
+        SELECT
+        st.product_id,
+        sum(st.stock) stock,
+        sum(st.sell_count) sellCount
+        FROM
+        tbl_pro_product_stock st
+        where st.sku_id in(
+        select sku_id from tbl_pro_product_shelf ps inner join tbl_pro_product_shelf_ref psr on ps.id=psr.shelf_id
+        )
+        GROUP BY
+        st.product_id
+        ) stk ON p.id = stk.product_id
+        <where>
+            <if test="shelfName!=null and shelfName!=''">
+                and ps.product_shelf_name like CONCAT('%',#{shelfName},'%')
+            </if>
+            <if test="spuNo!=null and spuNo!=''">
+                and p.spu_no=#{spuNo}
+            </if>
+            <if test="typeId!=null and typeId!=''">
+                and p.type_id=#{typeId}
+            </if>
+            <if test="shelfNo!=null and shelfNo!=''">
+                and ps.shelf_no=#{shelfNo}
+            </if>
+            <if test="startTime!=null">
+                and DATE_FORMAT(ps.modify_time,'%Y-%m-%d') &gt;= DATE_FORMAT(#{startTime},'%Y-%m-%d')
+            </if>
+            <if test="endTime!=null">
+                and  DATE_FORMAT(ps.modify_time,'%Y-%m-%d') &lt;= DATE_FORMAT(#{startTime},'%Y-%m-%d')
+            </if>
+            and ps.flag=1
+        </where>
+        order by ps.modify_time desc
+    </select>
+
+    <select id="findProductShelf" resultType="com.baibei.shiyi.product.feign.bean.vo.ProductShelfVo">
+        select
+        shelf.id as shelfId,
+        shelf.shelf_no as shelfNo,
+        shelf.spu_no as spuNo,
+        shelf.product_shelf_name as shelfName,
+        product.product_img as productImg,
+        mps.minShelfPrice as minShelfPrice,
+        shelf.line_price as linePrice,
+        shelf.source as source,
+        product.id as productId,
+        product.product_desc as productDesc,
+        shelf.shelf_time as shelfTime,
+        shelf.freight_type as freightType,
+        shelf.shelf_type shelfType,
+        shelf.maxdetuch,
+        shelf.unit integralUnit,
+        s.sellCount,
+        product.common_sell_count commonSellCount
+        from tbl_pro_product_shelf shelf left join tbl_pro_product product on shelf.product_id=product.id
+        left JOIN (
+        SELECT
+        ps.id shelfId,
+        min(psr.shelf_price) minShelfPrice
+        FROM
+        tbl_pro_product_shelf ps
+        INNER JOIN tbl_pro_product_shelf_ref psr ON ps.id = psr.shelf_id
+        AND psr.flag = 1
+        AND ps.flag = 1
+        AND ps. STATUS = 'shelf'
+        GROUP BY ps.id) mps ON shelf.id = mps.shelfId
+        INNER JOIN (
+        SELECT
+        stock.product_id,
+        sum(stock.sell_count) sellCount
+        FROM
+        tbl_pro_product_stock stock
+        GROUP BY
+        stock.product_id
+        ) s ON product.id = s.product_id
+        <where>
+            shelf.status='shelf'
+            and shelf.flag=1
+            <if test="shelfName!=null and shelfName!=''">
+                and shelf.product_shelf_name like concat('%',#{shelfName},'%')
+            </if>
+        </where>
+        order by shelf.shelf_time desc
+    </select>
+
+    <select id="findByShelfName" resultMap="BaseResultMap">
+        select
+        <include refid="baseColumn"/>
+        from tbl_pro_product_shelf
+        <where>
+            flag=1
+            and status='shelf'
+            <if test="shelfName!=null">
+                and product_shelf_name like concat('%',#{shelfName},'%')
+            </if>
+
+        </where>
+    </select>
+
+
+</mapper>

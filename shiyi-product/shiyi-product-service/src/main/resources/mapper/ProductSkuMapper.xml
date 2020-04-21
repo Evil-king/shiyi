@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.product.dao.ProductSkuMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.product.model.ProductSku">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="product_id" jdbcType="BIGINT" property="productId" />
+    <result column="sku_no" jdbcType="VARCHAR" property="skuNo" />
+    <result column="sku_property" jdbcType="VARCHAR" property="skuProperty" />
+    <result column="platform_price" jdbcType="DECIMAL" property="platformPrice" />
+    <result column="seq" jdbcType="INTEGER" property="seq" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+    <update id="softDelete">
+      update tbl_pro_product_sku set flag=0,modify_time=now() where product_id=#{productId}
+    </update>
+    <select id="selectSkuStockList" resultType="com.baibei.shiyi.product.feign.bean.vo.AdmEditProductSkuVo">
+      select
+      ps.id skuId,
+      ps.sku_property skuProperty,
+      ps.sku_no skuNo,
+      pk.stock
+      from tbl_pro_product_sku ps
+      left join tbl_pro_product_stock pk on ps.id=pk.sku_id and pk.flag=1
+      where ps.product_id=#{productId} and ps.flag=1;
+    </select>
+    <select id="selectProductSkuList" resultType="com.baibei.shiyi.product.feign.bean.vo.BaseProductSkuVo">
+       SELECT
+          pu.id skuId,
+          pu.product_id productId,
+          pu.spu_no spuNo,
+          pu.sku_property skuProperty,
+          pu.sku_no skuNo,
+          st.stock
+      FROM
+          tbl_pro_product_sku pu
+      LEFT JOIN tbl_pro_product_stock st ON st.sku_id = pu.id
+      AND st.product_id = pu.product_id
+      AND st.flag = 1
+      WHERE
+          pu.spu_no = #{spuNo}
+      AND pu.flag = 1;
+    </select>
+</mapper>

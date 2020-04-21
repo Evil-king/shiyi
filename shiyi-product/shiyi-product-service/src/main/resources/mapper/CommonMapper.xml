@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.product.dao.CommonMapper">
+
+    <sql id="indexShelfColumn">
+         ps.id shelfId,
+        ps.shelf_no shelfNo,
+        ps.product_shelf_name shelfName,
+        ps.shelf_time shelfTime,
+        ps.line_price linePrice,
+        ps.shelf_type shelfType,
+        ps.freight_type freightType,
+        ps.maxdetuch,
+        ps.unit integralUnit,
+        ps.status shelfStatus,
+        mps.minShelfPrice,
+        p.id productId,
+        p.spu_no spuNo,
+        p.product_img productImg,
+        p.product_desc productDesc,
+        p.common_sell_count commonSellCount
+    </sql>
+
+    <sql id="minShelfPriceSelect">
+        (
+        SELECT
+            ps.id shelfId,
+            min(psr.shelf_price) minShelfPrice
+        FROM
+            tbl_pro_product_shelf ps
+        INNER JOIN tbl_pro_product_shelf_ref psr ON ps.id = psr.shelf_id
+        <if test="shelfId!=null and shelfId!=''">AND ps.id=#{shelfId}</if>
+        AND psr.flag = 1
+        AND ps.flag = 1
+        AND ps. STATUS = 'shelf'
+        GROUP BY
+            ps.id
+    ) mps ON ps.id = mps.shelfId
+    </sql>
+
+
+</mapper>

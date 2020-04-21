@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baibei.shiyi.order.dao.OrderItemMapper">
+  <resultMap id="BaseResultMap" type="com.baibei.shiyi.order.model.OrderItem">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="order_item_no" jdbcType="VARCHAR" property="orderItemNo" />
+    <result column="order_id" jdbcType="BIGINT" property="orderId" />
+    <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+    <result column="shelf_id" jdbcType="BIGINT" property="shelfId" />
+    <result column="sku_id" jdbcType="BIGINT" property="skuId" />
+    <result column="sku_property" jdbcType="VARCHAR" property="skuProperty" />
+    <result column="product_img" jdbcType="VARCHAR" property="productImg" />
+    <result column="product_name" jdbcType="VARCHAR" property="productName" />
+    <result column="shelf_type" jdbcType="VARCHAR" property="shelfType"/>
+    <result column="amount" jdbcType="DECIMAL" property="amount" />
+    <result column="quantity" jdbcType="INTEGER" property="quantity" />
+    <result column="actual_amount" jdbcType="DECIMAL" property="actualAmount" />
+    <result column="pay_way" jdbcType="VARCHAR" property="payWay"/>
+    <result column="send_integral_json" jdbcType="VARCHAR" property="sendIntegralJson" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="delivery_company" jdbcType="VARCHAR" property="deliveryCompany" />
+    <result column="delivery_no" jdbcType="VARCHAR" property="deliveryNo" />
+    <result column="delivery_time" jdbcType="TIMESTAMP" property="deliveryTime" />
+    <result column="completed_time" jdbcType="TIMESTAMP" property="completedTime" />
+    <result column="cancel_time" jdbcType="TIMESTAMP" property="cancelTime" />
+    <result column="auto_delivery_time" jdbcType="TIMESTAMP" property="autoDeliveryTime"/>
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="flag" jdbcType="TINYINT" property="flag" />
+  </resultMap>
+
+  <select id="findConfirmOverTimeOrder" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select * from tbl_ord_order_item m where 1=1
+    and m.status = 'deliveryed'
+    and (m.refund_status ='' or m.refund_status is null)
+    <![CDATA[and m.auto_delivery_time <= now()]]>
+  </select>
+
+  <select id="orderAndOrderItemPageList" resultType="com.baibei.shiyi.order.feign.base.vo.AdminOrderItemVo">
+    select
+    oi.id as orderItemId,
+    oi.order_item_no as orderItemNo,
+    o.order_no as orderNo,
+    CASE
+    WHEN oi.pay_way = 'money'
+    THEN
+    '现金支付'
+    WHEN oi.pay_way = 'mallAccount'
+    THEN
+    '商城账户'
+    WHEN oi.pay_way = 'consumption'
+    THEN
+    '消费积分支付'
+    END payWay,
+    oi.actual_amount as actualAmount,
+    oi.create_time as createTime,
+    oi.create_time as payTime,
+    oi.customer_no as customerNo,
+    CASE
+    WHEN oi.status = 'undelivery'
+    THEN
+    '待发货'
+    WHEN oi.status = 'deliveryed'
+    THEN
+    '待收货'
+    WHEN oi.status = 'cancel'
+    THEN
+    '已取消'
+    WHEN oi.status ='completed'
+    THEN
+    '已完成'
+    END status
+    FROM tbl_ord_order_item oi
+    LEFT JOIN tbl_ord_order o ON o.id=oi.order_id
+    <where>
+      o.flag=1
+      <if test="orderNo!=null and orderNo!=''">
+        and o.order_no=#{orderNo}
+      </if>
+      <if test="orderItemNo!=null and orderItemNo!=''">
+        and oi.order_item_no=#{orderItemNo}
+      </if>
+      <if test="customerNo!=null and customerNo!=''">
+        and oi.customer_no=#{customerNo}
+      </if>
+      <if test="payWay!=null and payWay!=''">
+        and oi.pay_way=#{payWay}
+      </if>
+      <if test="createTime!=null and createTime !=''">
+        and DATE_FORMAT(o.create_time,'%Y-%m-%d') = DATE_FORMAT(#{createTime},'%Y-%m-%d')
+      </if>
+      <if test="status!=null and status!=''">
+        and oi.status=#{status}
+      </if>
+    </where>
+    order by o.create_time desc
+  </select>
+
+</mapper>
