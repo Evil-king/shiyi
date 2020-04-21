@@ -96,11 +96,6 @@
                 <version>${project.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>com.baibei</groupId>
-                <artifactId>shiyi-pingan-feign</artifactId>
-                <version>${project.version}</version>
-            </dependency>
             <!--出入金服务-->
             <dependency>
                 <groupId>com.baibei</groupId>
