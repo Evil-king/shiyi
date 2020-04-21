@@ -19,16 +19,12 @@
         <module>shiyi-user</module>
         <module>shiyi-account</module>
         <module>shiyi-public</module>
-        <module>shiyi-quotation</module>
         <module>shiyi-cash</module>
         <module>shiyi-admin-web</module>
         <module>shiyi-code-generator</module>
         <module>shiyi-content</module>
         <module>shiyi-order</module>
-        <module>shiyi-search</module>
         <module>shiyi-scheduler</module>
-        <module>shiyi-pingan</module>
-        <module>shiyi-settlement</module>
         <module>shiyi-component-redis</module>
     </modules>
 
@@ -71,11 +67,6 @@
 
             <dependency>
                 <groupId>com.baibei</groupId>
-                <artifactId>shiyi-settlement-feign</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.baibei</groupId>
                 <artifactId>shiyi-account-feign</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -92,11 +83,6 @@
             <dependency>
                 <groupId>com.baibei</groupId>
                 <artifactId>shiyi-user-feign</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.baibei</groupId>
-                <artifactId>shiyi-quotation-feign</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -256,29 +242,6 @@
             </snapshots>
         </repository>
     </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>nexus-releases</id>
-            <url>http://120.79.238.251:8081/repository/group-maven/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </pluginRepository>
-        <pluginRepository>
-            <id>nexus-snapshots</id>
-            <url>http://120.79.238.251:8081/repository/group-maven/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
-
     <build>
         <pluginManagement>
             <plugins>

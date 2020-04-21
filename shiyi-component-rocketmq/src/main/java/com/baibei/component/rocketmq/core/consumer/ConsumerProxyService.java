@@ -32,7 +32,7 @@ public class ConsumerProxyService {
      *
      * @param consumer
      * @param messageExt
-     * @return
+     * @return·
      */
     public ApiResult consume(IConsumer consumer, MessageExt messageExt) {
         long start = System.currentTimeMillis();
